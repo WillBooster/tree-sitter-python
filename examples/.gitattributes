@@ -1,0 +1,4 @@
+# These examples exercise CRLF line endings, which the `text eol=lf` of *.py in the root .gitattributes would normalize.
+crlf-line-endings.py -text
+python2-grammar-crlf.py -text
+python3-grammar-crlf.py -text
