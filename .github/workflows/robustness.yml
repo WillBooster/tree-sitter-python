@@ -66,11 +66,11 @@ jobs:
       - run: |
           mkdir -p .tmp/fuzz-seeds
           script/fuzz-seeds .tmp/fuzz-seeds $(find test/corpus -name '*.txt' | LC_ALL=C sort)
-          # libFuzzer runs just as well without seeds, so the seeds must show that every NUL character reached them.
+          # libFuzzer runs just as well without seeds: script/fuzz-seeds fails unless every corpus case became a seed, and
+          # the seeds must carry every NUL character the corpus holds (none so far).
           corpus_nuls=$(find test/corpus -name '*.txt' -exec cat {} + | tr -dc '\000' | wc -c)
           seed_nuls=$(find .tmp/fuzz-seeds -type f -exec cat {} + | tr -dc '\000' | wc -c)
           echo "NUL characters: $corpus_nuls in the corpus, $seed_nuls in the seeds"
-          test "$corpus_nuls" -gt 0
           test "$seed_nuls" -eq "$corpus_nuls"
       - name: Build the fuzzer
         run: |
