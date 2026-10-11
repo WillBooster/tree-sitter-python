@@ -1,0 +1,6 @@
+# These examples are parser inputs: their line endings, trailing whitespace, and missing final newlines are part of what
+# they exercise, so editors must keep them as they are.
+[*]
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
