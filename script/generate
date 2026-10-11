@@ -37,7 +37,8 @@ trap 'exit 130' INT
 trap 'exit 131' QUIT
 trap 'exit 143' TERM
 examples="$workspace/examples.z"
-git ls-files -z -- examples ':(exclude)examples/.gitattributes' > "$examples"
+# The dotfiles in examples/ configure Git and editors for the examples and are no parser inputs.
+git ls-files -z -- examples ':(exclude)examples/.*' > "$examples"
 
 training=(--corpus "$root/test/corpus")
 while IFS= read -r -d '' file; do

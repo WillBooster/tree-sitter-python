@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export function generationInputMtime(root: string): number {
   const corpus = path.join(root, 'test/corpus');
-  const examples = execFileSync('git', ['ls-files', '-z', '--', 'examples', ':(exclude)examples/.gitattributes'], {
+  const examples = execFileSync('git', ['ls-files', '-z', '--', 'examples', ':(exclude)examples/.*'], {
     cwd: root,
     encoding: 'utf8',
   })
