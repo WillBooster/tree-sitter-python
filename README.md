@@ -115,12 +115,14 @@ and the release build regenerate the parsers before compiling them.
   (ten times the lines take about ten times the CPU time, under a ceiling), since consumers parse files while they are
   being edited. It loads the Wasm build through @willbooster/web-tree-sitter, which `bun run build/ci` rebuilds after
   regenerating the parser;
+- a native CLI crash regression for deeply indented strings (`test/unit/deepIndentation.test.ts`);
 - a check that `package.json` and `Cargo.lock` test the same runtime version (`test/unit/runtimeVersion.test.ts`);
 - checks that the Wasm build parses in Chromium (`test/unit/browser/`) and in Cloudflare Workers with and without
   Node.js compatibility (`test/unit/workerd.test.ts`). Run `bun run test/ci-setup` once to install Chromium.
 
-The tests and `script/parse-examples` compile the parser into `.tmp/tree-sitter-lib` rather than the CLI's cache shared
-by every checkout; `script/fuzz-corpus` builds a per-run parser in `.tmp/fuzz` and deletes it afterwards.
+Tests and `script/parse-examples` keep native parser builds under this checkout's `.tmp/` instead of the CLI cache shared by every checkout.
+See `test/unit/run.ts`, `test/unit/deepIndentation.test.ts`, `script/fuzz-corpus`, and `script/parse-examples`
+for their build locations and cleanup.
 
 CI also runs these tests on Linux arm64 and macOS, where the CLI compiles the parser and the scanner with the platform's
 C compiler as the crate does for its users, and fuzzes the parser with libFuzzer and sanitizers
