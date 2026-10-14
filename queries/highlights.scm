@@ -36,15 +36,15 @@
 
 ((class_definition
   name: (identifier) @constructor)
- (#match? @constructor "^[0-9_]*[A-Z]"))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ((class_definition
   superclasses: (argument_list (identifier) @constructor))
- (#match? @constructor "^[0-9_]*[A-Z]"))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ((class_definition
   superclasses: (argument_list (subscript value: (identifier) @constructor)))
- (#match? @constructor "^[0-9_]*[A-Z]"))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ((except_clause value: [
   (identifier) @constructor
@@ -56,10 +56,10 @@
     (parenthesized_expression (identifier) @constructor)
   ])
 ])
- (#match? @constructor "^[0-9_]*[A-Z]"))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ((class_pattern (dotted_name (identifier) @constructor))
- (#match? @constructor "^[0-9_]*[A-Z]"))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
