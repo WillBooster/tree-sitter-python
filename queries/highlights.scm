@@ -6,7 +6,7 @@
  (#match? @constructor "^[A-Z]"))
 
 ((identifier) @constant
- (#match? @constant "^_*[A-Z][A-Z_0-9]*$"))
+ (#match? @constant "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ; Function calls
 
@@ -31,6 +31,9 @@
 
 (function_definition
   name: (identifier) @function)
+
+(class_definition
+  name: (identifier) @constructor)
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
