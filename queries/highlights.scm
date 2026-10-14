@@ -34,11 +34,16 @@
 
 ; Later patterns override naming heuristics in syntactically known class positions.
 
-(class_definition
+((class_definition
   name: (identifier) @constructor)
+ (#match? @constructor "^[0-9_]*[A-Z]"))
 
 ((class_definition
   superclasses: (argument_list (identifier) @constructor))
+ (#match? @constructor "^[0-9_]*[A-Z]"))
+
+((class_definition
+  superclasses: (argument_list (subscript value: (identifier) @constructor)))
  (#match? @constructor "^[0-9_]*[A-Z]"))
 
 ((except_clause value: (identifier) @constructor)
