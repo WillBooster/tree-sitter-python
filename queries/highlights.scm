@@ -46,10 +46,16 @@
   superclasses: (argument_list (subscript value: (identifier) @constructor)))
  (#match? @constructor "^[0-9_]*[A-Z]"))
 
-((except_clause value: (identifier) @constructor)
- (#match? @constructor "^[0-9_]*[A-Z]"))
-
-((except_clause value: (as_pattern (identifier) @constructor))
+((except_clause value: [
+  (identifier) @constructor
+  (tuple (identifier) @constructor)
+  (parenthesized_expression (identifier) @constructor)
+  (as_pattern [
+    (identifier) @constructor
+    (tuple (identifier) @constructor)
+    (parenthesized_expression (identifier) @constructor)
+  ])
+])
  (#match? @constructor "^[0-9_]*[A-Z]"))
 
 ((class_pattern (dotted_name (identifier) @constructor))
