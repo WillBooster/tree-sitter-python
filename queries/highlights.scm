@@ -32,11 +32,22 @@
 (function_definition
   name: (identifier) @function)
 
+; Later patterns override naming heuristics in syntactically known class positions.
+
 (class_definition
   name: (identifier) @constructor)
 
 ((class_definition
   superclasses: (argument_list (identifier) @constructor))
+ (#match? @constructor "^[0-9_]*[A-Z]"))
+
+((except_clause value: (identifier) @constructor)
+ (#match? @constructor "^[0-9_]*[A-Z]"))
+
+((except_clause value: (as_pattern (identifier) @constructor))
+ (#match? @constructor "^[0-9_]*[A-Z]"))
+
+((class_pattern (dotted_name (identifier) @constructor))
  (#match? @constructor "^[0-9_]*[A-Z]"))
 
 (attribute attribute: (identifier) @property)
