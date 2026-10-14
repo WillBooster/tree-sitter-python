@@ -35,6 +35,10 @@
 (class_definition
   name: (identifier) @constructor)
 
+((class_definition
+  superclasses: (argument_list (identifier) @constructor))
+ (#match? @constructor "^[0-9_]*[A-Z]"))
+
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
 
