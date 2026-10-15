@@ -6,7 +6,7 @@
  (#match? @constructor "^[A-Z]"))
 
 ((identifier) @constant
- (#match? @constant "^[A-Z][A-Z_]*$"))
+ (#match? @constant "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 ; Function calls
 
@@ -31,6 +31,35 @@
 
 (function_definition
   name: (identifier) @function)
+
+; Later patterns override naming heuristics in syntactically known class positions.
+
+((class_definition
+  name: (identifier) @constructor)
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
+
+((class_definition
+  superclasses: (argument_list (identifier) @constructor))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
+
+((class_definition
+  superclasses: (argument_list (subscript value: (identifier) @constructor)))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
+
+((except_clause value: [
+  (identifier) @constructor
+  (tuple (identifier) @constructor)
+  (parenthesized_expression (identifier) @constructor)
+  (as_pattern [
+    (identifier) @constructor
+    (tuple (identifier) @constructor)
+    (parenthesized_expression (identifier) @constructor)
+  ])
+])
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
+
+((class_pattern (dotted_name (identifier) @constructor .))
+ (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
