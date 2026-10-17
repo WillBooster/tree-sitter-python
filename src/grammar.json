@@ -5104,8 +5104,13 @@
                 "name": "expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "list_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_comprehension_list_splat"
+                },
+                "named": true,
+                "value": "list_splat"
               }
             ]
           }
@@ -5138,8 +5143,13 @@
                 "name": "pair"
               },
               {
-                "type": "SYMBOL",
-                "name": "dictionary_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_comprehension_dictionary_splat"
+                },
+                "named": true,
+                "value": "dictionary_splat"
               }
             ]
           }
@@ -5172,8 +5182,13 @@
                 "name": "expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "list_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_comprehension_list_splat"
+                },
+                "named": true,
+                "value": "list_splat"
               }
             ]
           }
@@ -5206,8 +5221,13 @@
                 "name": "expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "list_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_comprehension_list_splat"
+                },
+                "named": true,
+                "value": "list_splat"
               }
             ]
           }
@@ -5219,6 +5239,36 @@
         {
           "type": "STRING",
           "value": ")"
+        }
+      ]
+    },
+    "_comprehension_list_splat": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "*"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "primary_expression"
+          }
+        ]
+      }
+    },
+    "_comprehension_dictionary_splat": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "**"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "primary_expression"
         }
       ]
     },

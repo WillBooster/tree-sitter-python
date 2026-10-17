@@ -807,24 +807,24 @@ Lists
         (identifier))))
   (expression_statement
     (list
-      (list_splat
-        (attribute
-          (identifier)
-          (identifier)))))
+      (attribute
+        (list_splat
+          (identifier))
+        (identifier))))
   (expression_statement
     (list
-      (list_splat
-        (attribute
-          (subscript
-            (identifier)
+      (attribute
+        (subscript
+          (list_splat
             (identifier))
-          (identifier)))))
+          (identifier))
+        (identifier))))
   (expression_statement
     (list
-      (list_splat
-        (call
-          (identifier)
-          (argument_list))))))
+      (call
+        (list_splat
+          (identifier))
+        (argument_list)))))
 
 ================================================================================
 List comprehensions
@@ -1294,3 +1294,60 @@ f(*(x, x) for x in xs)
         (for_in_clause
           (identifier)
           (identifier))))))
+
+================================================================================
+Parenthesized unpacking comprehension operands
+================================================================================
+
+[*(x if cond else y) for z in zs]
+{*(x if cond else y) for z in zs}
+(*(x if cond else y) for z in zs)
+{**(x if cond else y) for z in zs}
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (list_comprehension
+      (list_splat
+        (parenthesized_expression
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (set_comprehension
+      (list_splat
+        (parenthesized_expression
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (parenthesized_expression
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (parenthesized_expression
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier)))))

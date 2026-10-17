@@ -718,16 +718,40 @@ module.exports = grammar({
     pair: ($) => seq(field('key', $.expression), ':', field('value', $.expression)),
 
     list_comprehension: ($) =>
-      seq('[', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, ']'),
+      seq(
+        '[',
+        field('body', choice($.expression, alias($._comprehension_list_splat, $.list_splat))),
+        $._comprehension_clauses,
+        ']'
+      ),
 
     dictionary_comprehension: ($) =>
-      seq('{', field('body', choice($.pair, $.dictionary_splat)), $._comprehension_clauses, '}'),
+      seq(
+        '{',
+        field('body', choice($.pair, alias($._comprehension_dictionary_splat, $.dictionary_splat))),
+        $._comprehension_clauses,
+        '}'
+      ),
 
     set_comprehension: ($) =>
-      seq('{', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, '}'),
+      seq(
+        '{',
+        field('body', choice($.expression, alias($._comprehension_list_splat, $.list_splat))),
+        $._comprehension_clauses,
+        '}'
+      ),
 
     generator_expression: ($) =>
-      seq('(', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, ')'),
+      seq(
+        '(',
+        field('body', choice($.expression, alias($._comprehension_list_splat, $.list_splat))),
+        $._comprehension_clauses,
+        ')'
+      ),
+
+    _comprehension_list_splat: ($) => prec.dynamic(1, seq('*', $.primary_expression)),
+
+    _comprehension_dictionary_splat: ($) => seq('**', $.primary_expression),
 
     _comprehension_clauses: ($) => seq($.for_in_clause, repeat(choice($.for_in_clause, $.if_clause))),
 
