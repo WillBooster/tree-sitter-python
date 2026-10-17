@@ -174,10 +174,6 @@
         "named": true
       },
       {
-        "type": "list_splat",
-        "named": true
-      },
-      {
         "type": "none",
         "named": true
       },
@@ -263,10 +259,6 @@
         },
         {
           "type": "list_splat",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
           "named": true
         }
       ]
@@ -400,10 +392,6 @@
           },
           {
             "type": "expression_list",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
             "named": true
           },
           {
@@ -544,10 +532,6 @@
           },
           {
             "type": "expression_list",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
             "named": true
           },
           {
@@ -788,7 +772,27 @@
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "boolean_operator",
+            "named": true
+          },
+          {
+            "type": "comparison_operator",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "not_operator",
+            "named": true
+          },
+          {
+            "type": "primary_expression",
             "named": true
           }
         ]
@@ -812,7 +816,27 @@
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "boolean_operator",
+            "named": true
+          },
+          {
+            "type": "comparison_operator",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "not_operator",
+            "named": true
+          },
+          {
+            "type": "primary_expression",
             "named": true
           }
         ]
@@ -1158,7 +1182,27 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "boolean_operator",
+          "named": true
+        },
+        {
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
@@ -1406,6 +1450,10 @@
         "required": true,
         "types": [
           {
+            "type": "dictionary_splat",
+            "named": true
+          },
+          {
             "type": "pair",
             "named": true
           }
@@ -1436,7 +1484,27 @@
       "required": true,
       "types": [
         {
-          "type": "expression",
+          "type": "boolean_operator",
+          "named": true
+        },
+        {
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
@@ -1599,6 +1667,10 @@
         {
           "type": "expression",
           "named": true
+        },
+        {
+          "type": "list_splat",
+          "named": true
         }
       ]
     }
@@ -1621,6 +1693,10 @@
         },
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "list_splat",
           "named": true
         },
         {
@@ -1747,10 +1823,6 @@
           },
           {
             "type": "expression_list",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
             "named": true
           },
           {
@@ -1882,6 +1954,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "list_splat",
             "named": true
           }
         ]
@@ -2074,10 +2150,6 @@
           },
           {
             "type": "expression_list",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
             "named": true
           },
           {
@@ -2275,14 +2347,6 @@
         {
           "type": "list_splat",
           "named": true
-        },
-        {
-          "type": "parenthesized_list_splat",
-          "named": true
-        },
-        {
-          "type": "yield",
-          "named": true
         }
       ]
     }
@@ -2297,6 +2361,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "list_splat",
             "named": true
           }
         ]
@@ -2345,19 +2413,27 @@
       "required": true,
       "types": [
         {
-          "type": "attribute",
+          "type": "boolean_operator",
           "named": true
         },
         {
-          "type": "expression",
+          "type": "comparison_operator",
           "named": true
         },
         {
-          "type": "identifier",
+          "type": "conditional_expression",
           "named": true
         },
         {
-          "type": "subscript",
+          "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
@@ -2406,6 +2482,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "list_splat",
             "named": true
           }
         ]
@@ -2598,7 +2678,27 @@
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "boolean_operator",
+            "named": true
+          },
+          {
+            "type": "comparison_operator",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "not_operator",
+            "named": true
+          },
+          {
+            "type": "primary_expression",
             "named": true
           }
         ]
@@ -2659,34 +2759,7 @@
           "named": true
         },
         {
-          "type": "list_splat",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
-          "named": true
-        },
-        {
           "type": "yield",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "parenthesized_list_splat",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "list_splat",
-          "named": true
-        },
-        {
-          "type": "parenthesized_expression",
           "named": true
         }
       ]
@@ -2826,14 +2899,6 @@
         {
           "type": "list_splat",
           "named": true
-        },
-        {
-          "type": "parenthesized_list_splat",
-          "named": true
-        },
-        {
-          "type": "yield",
-          "named": true
         }
       ]
     }
@@ -2848,6 +2913,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "list_splat",
             "named": true
           }
         ]
@@ -2907,7 +2976,27 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "boolean_operator",
+          "named": true
+        },
+        {
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         }
       ]
@@ -2969,6 +3058,10 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          },
+          {
+            "type": "list_splat",
             "named": true
           },
           {
@@ -3038,14 +3131,6 @@
         {
           "type": "list_splat",
           "named": true
-        },
-        {
-          "type": "parenthesized_list_splat",
-          "named": true
-        },
-        {
-          "type": "yield",
-          "named": true
         }
       ]
     }
@@ -3090,11 +3175,11 @@
           "named": true
         },
         {
-          "type": "member_type",
+          "type": "identifier",
           "named": true
         },
         {
-          "type": "splat_type",
+          "type": "member_type",
           "named": true
         },
         {
@@ -3138,6 +3223,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "splat_type",
+          "named": true
+        },
         {
           "type": "type",
           "named": true
@@ -3189,6 +3278,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "splat_type",
+            "named": true
+          },
           {
             "type": "type",
             "named": true

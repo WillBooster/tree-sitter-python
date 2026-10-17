@@ -1006,7 +1006,7 @@ Tuples with splats
 Tuples with yield
 ================================================================================
 
-(a, yield a, b, c)
+(a, (yield a, b, c))
 
 --------------------------------------------------------------------------------
 
@@ -1014,11 +1014,12 @@ Tuples with yield
   (expression_statement
     (tuple
       (identifier)
-      (yield
-        (expression_list
-          (identifier)
-          (identifier)
-          (identifier))))))
+      (parenthesized_expression
+        (yield
+          (expression_list
+            (identifier)
+            (identifier)
+            (identifier)))))))
 
 ================================================================================
 Default Tuple Arguments
@@ -1227,4 +1228,526 @@ y: type[int] = int
           (type_parameter
             (type
               (identifier)))))
+      (identifier))))
+
+================================================================================
+Unpacking expression lists and subscripts
+================================================================================
+
+*xs,
+first, *xs
+result = *xs,
+result = first, *xs
+result = values[*xs]
+result = values[0, *xs, 1:]
+result = f(*xs if flag else ys, **opts if flag else other)
+result = values[*xs if flag else ys]
+def unpack(xs):
+    return *xs,
+    yield first, *xs
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (list_splat
+      (identifier)))
+  (expression_statement
+    (identifier)
+    (list_splat
+      (identifier)))
+  (expression_statement
+    (assignment
+      (identifier)
+      (expression_list
+        (list_splat
+          (identifier)))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (expression_list
+        (identifier)
+        (list_splat
+          (identifier)))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (subscript
+        (identifier)
+        (list_splat
+          (identifier)))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (subscript
+        (identifier)
+        (integer)
+        (list_splat
+          (identifier))
+        (slice
+          (integer)))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (call
+        (identifier)
+        (argument_list
+          (list_splat
+            (conditional_expression
+              (identifier)
+              (identifier)
+              (identifier)))
+          (dictionary_splat
+            (conditional_expression
+              (identifier)
+              (identifier)
+              (identifier)))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (subscript
+        (identifier)
+        (list_splat
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier))))))
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier))
+    (block
+      (return_statement
+        (expression_list
+          (list_splat
+            (identifier))))
+      (expression_statement
+        (yield
+          (expression_list
+            (identifier)
+            (list_splat
+              (identifier))))))))
+
+================================================================================
+Unpacking parameter annotations and generic arguments
+================================================================================
+
+def f(*args: *tuple[int, ...]): pass
+def g(*args: *Ts): pass
+type Alias[*Ts] = tuple[*Ts]
+x: tuple[*tuple[int]]
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (splat_type
+          (subscript
+            (identifier)
+            (identifier)
+            (ellipsis)))))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (splat_type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (splat_type
+            (identifier)))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (splat_type
+            (identifier))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (splat_type
+              (subscript
+                (identifier)
+                (identifier)))))))))
+
+================================================================================
+Expression operands in argument and subscript unpacking
+================================================================================
+
+x[*(a := seq)]
+x[*not a]
+x[*a or b]
+x[*lambda: a]
+x[*a if flag else b]
+x[*a if (flag := cond) else b]
+x[*lambda: (a := seq)]
+f(*(a := seq), **(b := mapping))
+a[*(b := seq)] = c
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (identifier))))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (not_operator
+          (identifier)))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (lambda
+          (identifier)))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (conditional_expression
+          (identifier)
+          (identifier)
+          (identifier)))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (conditional_expression
+          (identifier)
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (identifier)))
+          (identifier)))))
+  (expression_statement
+    (subscript
+      (identifier)
+      (list_splat
+        (lambda
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (identifier)))))))
+  (expression_statement
+    (call
+      (identifier)
+      (argument_list
+        (list_splat
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (identifier))))
+        (dictionary_splat
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (identifier)))))))
+  (expression_statement
+    (assignment
+      (subscript
+        (identifier)
+        (list_splat
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (identifier)))))
+      (identifier))))
+
+================================================================================
+Expression operands in generator and dictionary comprehension unpacking
+================================================================================
+
+(*a if c else b for z in zs)
+(*a or b for z in zs)
+(*a and b for z in zs)
+(*not a for z in zs)
+(*lambda: a for z in zs)
+(*a < b for z in zs)
+(*(a := b) for z in zs)
+{**a if c else b for z in zs}
+{**a or b for z in zs}
+{**a and b for z in zs}
+{**not a for z in zs}
+{**lambda: a for z in zs}
+{**a < b for z in zs}
+{**(a := b) for z in zs}
+(*(x, y) if cond else y for z in zs)
+f(*a if b else c for a in d)
+
+---
+
+(module
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (conditional_expression
+          (identifier)
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (not_operator
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (lambda
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (comparison_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (conditional_expression
+          (identifier)
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (not_operator
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (lambda
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (comparison_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (conditional_expression
+          (tuple
+            (identifier)
+            (identifier))
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (call
+      (identifier)
+      (generator_expression
+        (list_splat
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier)))
+        (for_in_clause
+          (identifier)
+          (identifier))))))
+
+================================================================================
+Starred type boundaries and ordinary type calls
+================================================================================
+
+def f(*args: *(int, str)): pass
+def g(**kw: tuple[*Ts]): pass
+class C[*Ts, **P]: pass
+x: tuple[*a if c else b]
+x: tuple[*not a]
+x: tuple[*lambda: a]
+type(_).foo = bar
+
+---
+
+(module
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (splat_type
+          (tuple
+            (identifier)
+            (identifier)))))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (dictionary_splat_pattern
+          (identifier))
+        (type
+          (generic_type
+            (identifier)
+            (type_parameter
+              (splat_type
+                (identifier)))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (splat_type
+        (identifier))
+      (splat_type
+        (identifier)))
+    (block
+      (pass_statement)))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (splat_type
+              (conditional_expression
+                (identifier)
+                (identifier)
+                (identifier))))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (splat_type
+              (not_operator
+                (identifier))))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (splat_type
+              (lambda
+                (identifier))))))))
+  (expression_statement
+    (assignment
+      (attribute
+        (call
+          (identifier)
+          (argument_list
+            (identifier)))
+        (identifier))
       (identifier))))
