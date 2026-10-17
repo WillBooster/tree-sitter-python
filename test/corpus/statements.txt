@@ -811,8 +811,8 @@ def g(h, i, /, j, *, k=100, **kwarg):
   return h,i,j,k,kwarg
 
 def h(*a):
-  i((*a))
-  j(((*a)))
+  i((*a,))
+  j(((*a,)))
 
 def foo():
     pass \
@@ -890,7 +890,7 @@ def foo():
         (call
           function: (identifier)
           arguments: (argument_list
-            (parenthesized_expression
+            (tuple
               (list_splat
                 (identifier))))))
       (expression_statement
@@ -898,7 +898,7 @@ def foo():
           function: (identifier)
           arguments: (argument_list
             (parenthesized_expression
-              (parenthesized_expression
+              (tuple
                 (list_splat
                   (identifier)))))))))
   (function_definition
