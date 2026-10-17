@@ -42,6 +42,7 @@ module.exports = grammar({
   extras: ($) => [$.comment, /[\s\f\uFEFF\u2060\u200B]|\r?\n/, $.line_continuation],
 
   conflicts: ($) => [
+    [$.list_splat_pattern, $._comprehension_list_splat],
     [$.primary_expression, $.pattern],
     [$.primary_expression, $.list_splat_pattern],
     [$.tuple, $.tuple_pattern],
@@ -87,6 +88,7 @@ module.exports = grammar({
   ],
 
   inline: ($) => [
+    $._unpacked_expression,
     $._simple_statement,
     $._compound_statement,
     $._suite,
@@ -516,7 +518,9 @@ module.exports = grammar({
         $.as_pattern
       ),
 
-    primary_expression: ($) =>
+    primary_expression: ($) => choice($._unpacked_expression, alias($.list_splat_pattern, $.list_splat)),
+
+    _unpacked_expression: ($) =>
       choice(
         $.await,
         $.binary_operator,
@@ -542,8 +546,7 @@ module.exports = grammar({
         $.tuple,
         $.parenthesized_expression,
         $.generator_expression,
-        $.ellipsis,
-        alias($.list_splat_pattern, $.list_splat)
+        $.ellipsis
       ),
 
     not_operator: ($) => prec(PREC.not, seq('not', field('argument', $.expression))),
@@ -749,9 +752,9 @@ module.exports = grammar({
         ')'
       ),
 
-    _comprehension_list_splat: ($) => prec.dynamic(1, seq('*', $.primary_expression)),
+    _comprehension_list_splat: ($) => prec.dynamic(1, seq('*', $._unpacked_expression)),
 
-    _comprehension_dictionary_splat: ($) => seq('**', $.primary_expression),
+    _comprehension_dictionary_splat: ($) => seq('**', $._unpacked_expression),
 
     _comprehension_clauses: ($) => seq($.for_in_clause, repeat(choice($.for_in_clause, $.if_clause))),
 
