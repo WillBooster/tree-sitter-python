@@ -254,14 +254,15 @@ module.exports = grammar({
 
     else_clause: ($) => seq('else', ':', field('body', $._suite)),
 
-    match_statement: ($) =>
-      seq(
+    match_statement: ($) => {
+      const subject = field('subject', choice($.expression, $.list_splat));
+      return seq(
         'match',
-        commaSep1(field('subject', $.expression)),
-        optional(','),
+        choice(field('subject', $.expression), seq(subject, ',', optional(seq(commaSep1(subject), optional(','))))),
         ':',
         field('body', alias($._match_block, $.block))
-      ),
+      );
+    },
 
     _match_block: ($) => choice(seq($._indent, repeat(field('alternative', $.case_clause)), $._dedent), $._newline),
 

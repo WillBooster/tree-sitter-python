@@ -435,3 +435,29 @@ f(**a := 1)
 --------------------------------------------------------------------------------
 
 (module)
+
+======================
+Unpacking match subject requires comma
+:error
+======================
+
+match *a:
+    case _:
+        pass
+
+---
+
+(ERROR)
+
+======================
+Unpacking match subject requires primary operand
+:error
+======================
+
+match *a or b,:
+    case _:
+        pass
+
+---
+
+(ERROR)
