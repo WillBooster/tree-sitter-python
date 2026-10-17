@@ -717,13 +717,17 @@ module.exports = grammar({
 
     pair: ($) => seq(field('key', $.expression), ':', field('value', $.expression)),
 
-    list_comprehension: ($) => seq('[', field('body', $.expression), $._comprehension_clauses, ']'),
+    list_comprehension: ($) =>
+      seq('[', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, ']'),
 
-    dictionary_comprehension: ($) => seq('{', field('body', $.pair), $._comprehension_clauses, '}'),
+    dictionary_comprehension: ($) =>
+      seq('{', field('body', choice($.pair, $.dictionary_splat)), $._comprehension_clauses, '}'),
 
-    set_comprehension: ($) => seq('{', field('body', $.expression), $._comprehension_clauses, '}'),
+    set_comprehension: ($) =>
+      seq('{', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, '}'),
 
-    generator_expression: ($) => seq('(', field('body', $.expression), $._comprehension_clauses, ')'),
+    generator_expression: ($) =>
+      seq('(', field('body', choice($.expression, $.list_splat)), $._comprehension_clauses, ')'),
 
     _comprehension_clauses: ($) => seq($.for_in_clause, repeat(choice($.for_in_clause, $.if_clause))),
 
