@@ -4749,24 +4749,33 @@
       "type": "PREC",
       "value": 1,
       "content": {
-        "type": "SEQ",
+        "type": "CHOICE",
         "members": [
           {
-            "type": "CHOICE",
+            "type": "SEQ",
             "members": [
               {
                 "type": "STRING",
                 "value": "*"
               },
               {
-                "type": "STRING",
-                "value": "**"
+                "type": "SYMBOL",
+                "name": "primary_expression"
               }
             ]
           },
           {
-            "type": "SYMBOL",
-            "name": "identifier"
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "**"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            ]
           }
         ]
       }

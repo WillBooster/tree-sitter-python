@@ -1327,3 +1327,68 @@ def unpack(xs):
             (identifier)
             (list_splat
               (identifier))))))))
+
+================================================================================
+Unpacking parameter annotations and generic arguments
+================================================================================
+
+def f(*args: *tuple[int, ...]): pass
+def g(*args: *Ts): pass
+type Alias[*Ts] = tuple[*Ts]
+x: tuple[*tuple[int]]
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (type
+          (splat_type
+            (subscript
+              (identifier)
+              (identifier)
+              (ellipsis))))))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (type
+          (splat_type
+            (identifier)))))
+    (block
+      (pass_statement)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (splat_type
+              (identifier))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (splat_type
+              (identifier)))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (type
+              (splat_type
+                (subscript
+                  (identifier)
+                  (identifier))))))))))

@@ -696,7 +696,7 @@ module.exports = grammar({
 
     type: ($) =>
       choice(prec(1, $.expression), $.splat_type, $.generic_type, $.union_type, $.constrained_type, $.member_type),
-    splat_type: ($) => prec(1, seq(choice('*', '**'), $.identifier)),
+    splat_type: ($) => prec(1, choice(seq('*', $.primary_expression), seq('**', $.identifier))),
     generic_type: ($) => prec(1, seq(choice($.identifier, alias('type', $.identifier)), $.type_parameter)),
     union_type: ($) => prec.left(seq($.type, '|', $.type)),
     constrained_type: ($) => prec.right(seq($.type, ':', $.type)),
