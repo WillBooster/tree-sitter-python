@@ -86,6 +86,7 @@ module.exports = grammar({
   ],
 
   inline: ($) => [
+    $._expression_without_named_expression,
     $._simple_statement,
     $._compound_statement,
     $._suite,
@@ -385,9 +386,9 @@ module.exports = grammar({
         ')'
       ),
 
-    _list_splat_argument: ($) => seq('*', $.expression),
+    _list_splat_argument: ($) => seq('*', $._expression_without_named_expression),
 
-    _dictionary_splat_argument: ($) => seq('**', $.expression),
+    _dictionary_splat_argument: ($) => seq('**', $._expression_without_named_expression),
 
     decorated_definition: ($) =>
       seq(repeat1($.decorator), field('definition', choice($.class_definition, $.function_definition))),
@@ -506,16 +507,16 @@ module.exports = grammar({
 
     _expression_within_for_in_clause: ($) => choice($.expression, alias($.lambda_within_for_in_clause, $.lambda)),
 
-    expression: ($) =>
+    expression: ($) => choice($._expression_without_named_expression, $.named_expression, $.as_pattern),
+
+    _expression_without_named_expression: ($) =>
       choice(
         $.comparison_operator,
         $.not_operator,
         $.boolean_operator,
         $.lambda,
         $.primary_expression,
-        $.conditional_expression,
-        $.named_expression,
-        $.as_pattern
+        $.conditional_expression
       ),
 
     primary_expression: ($) =>
@@ -547,12 +548,26 @@ module.exports = grammar({
         $.ellipsis
       ),
 
-    not_operator: ($) => prec(PREC.not, seq('not', field('argument', $.expression))),
+    not_operator: ($) => prec(PREC.not, seq('not', field('argument', $._expression_without_named_expression))),
 
     boolean_operator: ($) =>
       choice(
-        prec.left(PREC.and, seq(field('left', $.expression), field('operator', 'and'), field('right', $.expression))),
-        prec.left(PREC.or, seq(field('left', $.expression), field('operator', 'or'), field('right', $.expression)))
+        prec.left(
+          PREC.and,
+          seq(
+            field('left', $._expression_without_named_expression),
+            field('operator', 'and'),
+            field('right', $._expression_without_named_expression)
+          )
+        ),
+        prec.left(
+          PREC.or,
+          seq(
+            field('left', $._expression_without_named_expression),
+            field('operator', 'or'),
+            field('right', $._expression_without_named_expression)
+          )
+        )
       ),
 
     binary_operator: ($) => {
@@ -624,7 +639,12 @@ module.exports = grammar({
     lambda: ($) =>
       prec(
         PREC.lambda,
-        seq('lambda', field('parameters', optional($.lambda_parameters)), ':', field('body', $.expression))
+        seq(
+          'lambda',
+          field('parameters', optional($.lambda_parameters)),
+          ':',
+          field('body', $._expression_without_named_expression)
+        )
       ),
 
     lambda_within_for_in_clause: ($) =>
@@ -751,7 +771,16 @@ module.exports = grammar({
     if_clause: ($) => seq('if', $.expression),
 
     conditional_expression: ($) =>
-      prec.right(PREC.conditional, seq($.expression, 'if', $.expression, 'else', $.expression)),
+      prec.right(
+        PREC.conditional,
+        seq(
+          $._expression_without_named_expression,
+          'if',
+          $._expression_without_named_expression,
+          'else',
+          $._expression_without_named_expression
+        )
+      ),
 
     concatenated_string: ($) => seq($.string, repeat1($.string)),
 
