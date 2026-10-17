@@ -2976,6 +2976,26 @@
       "required": true,
       "types": [
         {
+          "type": "boolean_operator",
+          "named": true
+        },
+        {
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "lambda",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
           "type": "primary_expression",
           "named": true
         }
@@ -3155,11 +3175,11 @@
           "named": true
         },
         {
-          "type": "member_type",
+          "type": "identifier",
           "named": true
         },
         {
-          "type": "splat_type",
+          "type": "member_type",
           "named": true
         },
         {
@@ -3203,6 +3223,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "splat_type",
+          "named": true
+        },
         {
           "type": "type",
           "named": true
@@ -3254,6 +3278,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "splat_type",
+            "named": true
+          },
           {
             "type": "type",
             "named": true

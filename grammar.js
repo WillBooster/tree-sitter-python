@@ -48,7 +48,6 @@ module.exports = grammar({
     [$.with_item, $.tuple],
     [$.named_expression, $.as_pattern],
     [$.print_statement, $.primary_expression],
-    [$.type_alias_statement, $.primary_expression],
     [$.match_statement, $.primary_expression],
   ],
 
@@ -357,7 +356,12 @@ module.exports = grammar({
     exec_statement: ($) =>
       seq('exec', field('code', choice($.string, $.identifier)), optional(seq('in', commaSep1($.expression)))),
 
-    type_alias_statement: ($) => prec.dynamic(1, seq('type', field('left', $.type), '=', field('right', $.type))),
+    type_alias_statement: ($) =>
+      seq('type', field('left', alias($._type_alias_name, $.type)), '=', field('right', $.type)),
+
+    _type_alias_name: ($) => choice($.identifier, alias($._generic_type_definition, $.generic_type)),
+
+    _generic_type_definition: ($) => seq($.identifier, $.type_parameter),
 
     class_definition: ($) =>
       seq(
@@ -368,7 +372,10 @@ module.exports = grammar({
         ':',
         field('body', $._suite)
       ),
-    type_parameter: ($) => seq('[', commaSep1($.type), optional(','), ']'),
+    type_parameter: ($) => seq('[', commaSep1(choice($.type, $.splat_type)), optional(','), ']'),
+
+    _generic_type_arguments: ($) =>
+      seq('[', commaSep1(choice($.type, alias($._list_splat_argument, $.splat_type))), optional(','), ']'),
 
     argument_list: ($) =>
       seq(
@@ -712,13 +719,19 @@ module.exports = grammar({
     typed_parameter: ($) =>
       prec(
         PREC.typed_parameter,
-        seq(choice($.identifier, $.list_splat_pattern, $.dictionary_splat_pattern), ':', field('type', $.type))
+        choice(
+          seq(choice($.identifier, $.dictionary_splat_pattern), ':', field('type', $.type)),
+          seq($.list_splat_pattern, ':', field('type', choice($.type, alias($.list_splat, $.splat_type))))
+        )
       ),
 
-    type: ($) =>
-      choice(prec(1, $.expression), $.splat_type, $.generic_type, $.union_type, $.constrained_type, $.member_type),
-    splat_type: ($) => prec(1, choice(seq('*', $.primary_expression), seq('**', $.identifier))),
-    generic_type: ($) => prec(1, seq(choice($.identifier, alias('type', $.identifier)), $.type_parameter)),
+    type: ($) => choice(prec(1, $.expression), $.generic_type, $.union_type, $.constrained_type, $.member_type),
+    splat_type: ($) => prec(1, seq(choice('*', '**'), $.identifier)),
+    generic_type: ($) =>
+      prec(
+        1,
+        seq(choice($.identifier, alias('type', $.identifier)), alias($._generic_type_arguments, $.type_parameter))
+      ),
     union_type: ($) => prec.left(seq($.type, '|', $.type)),
     constrained_type: ($) => prec.right(seq($.type, ':', $.type)),
     member_type: ($) => seq($.type, '.', $.identifier),
