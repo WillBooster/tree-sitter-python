@@ -1489,3 +1489,178 @@ a[*(b := seq)] = c
               (identifier)
               (identifier)))))
       (identifier))))
+
+================================================================================
+Expression operands in generator and dictionary comprehension unpacking
+================================================================================
+
+(*a if c else b for z in zs)
+(*a or b for z in zs)
+(*a and b for z in zs)
+(*not a for z in zs)
+(*lambda: a for z in zs)
+(*a < b for z in zs)
+(*(a := b) for z in zs)
+{**a if c else b for z in zs}
+{**a or b for z in zs}
+{**a and b for z in zs}
+{**not a for z in zs}
+{**lambda: a for z in zs}
+{**a < b for z in zs}
+{**(a := b) for z in zs}
+(*(x, y) if cond else y for z in zs)
+f(*a if b else c for a in d)
+
+---
+
+(module
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (conditional_expression
+          (identifier)
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (not_operator
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (lambda
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (comparison_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (conditional_expression
+          (identifier)
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (boolean_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (not_operator
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (lambda
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (comparison_operator
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (dictionary_comprehension
+      (dictionary_splat
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (identifier))))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (generator_expression
+      (list_splat
+        (conditional_expression
+          (tuple
+            (identifier)
+            (identifier))
+          (identifier)
+          (identifier)))
+      (for_in_clause
+        (identifier)
+        (identifier))))
+  (expression_statement
+    (call
+      (identifier)
+      (generator_expression
+        (list_splat
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier)))
+        (for_in_clause
+          (identifier)
+          (identifier))))))

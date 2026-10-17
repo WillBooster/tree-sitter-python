@@ -5233,8 +5233,13 @@
                 "name": "pair"
               },
               {
-                "type": "SYMBOL",
-                "name": "dictionary_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_dictionary_splat_argument"
+                },
+                "named": true,
+                "value": "dictionary_splat"
               }
             ]
           }
@@ -5301,8 +5306,13 @@
                 "name": "expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "list_splat"
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_list_splat_argument"
+                },
+                "named": true,
+                "value": "list_splat"
               }
             ]
           }
