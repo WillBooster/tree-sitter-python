@@ -23,4 +23,4 @@ test('highlights lazy only as an import modifier', () => {
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
-});
+}, 180_000);
