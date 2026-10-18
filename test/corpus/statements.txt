@@ -155,6 +155,7 @@ Print statements with redirection
 
 print >> a
 print >> a, "b", "c"
+print >> a, *b, c
 
 --------------------------------------------------------------------------------
 
@@ -172,7 +173,13 @@ print >> a, "b", "c"
     (string
       (string_start)
       (string_content)
-      (string_end))))
+      (string_end)))
+  (print_statement
+    (chevron
+      (identifier))
+    (list_splat
+      (identifier))
+    (identifier)))
 
 ================================================================================
 Assert statements
@@ -811,8 +818,8 @@ def g(h, i, /, j, *, k=100, **kwarg):
   return h,i,j,k,kwarg
 
 def h(*a):
-  i((*a))
-  j(((*a)))
+  i((*a,))
+  j(((*a,)))
 
 def foo():
     pass \
@@ -890,7 +897,7 @@ def foo():
         (call
           function: (identifier)
           arguments: (argument_list
-            (parenthesized_expression
+            (tuple
               (list_splat
                 (identifier))))))
       (expression_statement
@@ -898,7 +905,7 @@ def foo():
           function: (identifier)
           arguments: (argument_list
             (parenthesized_expression
-              (parenthesized_expression
+              (tuple
                 (list_splat
                   (identifier)))))))))
   (function_definition
@@ -1484,9 +1491,8 @@ type IntOrStrSequence[T: (int, str)] = Sequence[T]  # TypeVar with constraints
       (generic_type
         (identifier)
         (type_parameter
-          (type
-            (splat_type
-              (identifier))))))
+          (splat_type
+            (identifier)))))
     (type
       (generic_type
         (identifier)
@@ -1501,18 +1507,16 @@ type IntOrStrSequence[T: (int, str)] = Sequence[T]  # TypeVar with constraints
       (generic_type
         (identifier)
         (type_parameter
-          (type
-            (splat_type
-              (identifier))))))
+          (splat_type
+            (identifier)))))
     (type
       (generic_type
         (identifier)
         (type_parameter
           (type
             (identifier))
-          (type
-            (splat_type
-              (identifier)))))))
+          (splat_type
+            (identifier))))))
   (comment)
   (type_alias_statement
     (type
@@ -1569,12 +1573,10 @@ def more_generic[T, *Ts, **P]():
     (type_parameter
       (type
         (identifier))
-      (type
-        (splat_type
-          (identifier)))
-      (type
-        (splat_type
-          (identifier))))
+      (splat_type
+        (identifier))
+      (splat_type
+        (identifier)))
     (parameters)
     (block
       (type_alias_statement
@@ -1584,12 +1586,10 @@ def more_generic[T, *Ts, **P]():
             (type_parameter
               (type
                 (identifier))
-              (type
-                (splat_type
-                  (identifier)))
-              (type
-                (splat_type
-                  (identifier))))))
+              (splat_type
+                (identifier))
+              (splat_type
+                (identifier)))))
         (type
           (generic_type
             (identifier)
@@ -1606,9 +1606,8 @@ def more_generic[T, *Ts, **P]():
                         (type_parameter
                           (type
                             (identifier))
-                          (type
-                            (splat_type
-                              (identifier)))))))))
+                          (splat_type
+                            (identifier))))))))
               (type
                 (generic_type
                   (identifier)
@@ -1621,8 +1620,7 @@ def more_generic[T, *Ts, **P]():
                         (type_parameter
                           (type
                             (identifier))
-                          (type
-                            (splat_type
-                              (identifier)))))))))))))
+                          (splat_type
+                            (identifier))))))))))))
       (return_statement
         (identifier)))))

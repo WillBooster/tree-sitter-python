@@ -1570,3 +1570,47 @@ match x:
             (identifier)))
         (block
           (pass_statement))))))
+
+================================================================================
+Unpacking match subjects
+================================================================================
+
+match *a, b:
+    case _:
+        pass
+match a, *b:
+    case _:
+        pass
+match *a,:
+    case _:
+        pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (match_statement
+    (list_splat
+      (identifier))
+    (identifier)
+    (block
+      (case_clause
+        (case_pattern)
+        (block
+          (pass_statement)))))
+  (match_statement
+    (identifier)
+    (list_splat
+      (identifier))
+    (block
+      (case_clause
+        (case_pattern)
+        (block
+          (pass_statement)))))
+  (match_statement
+    (list_splat
+      (identifier))
+    (block
+      (case_clause
+        (case_pattern)
+        (block
+          (pass_statement))))))
