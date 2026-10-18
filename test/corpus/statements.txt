@@ -1624,3 +1624,159 @@ def more_generic[T, *Ts, **P]():
                             (identifier))))))))))))
       (return_statement
         (identifier)))))
+
+================================================================================
+Lazy imports
+================================================================================
+lazy import json
+lazy import os.path as path, sys
+lazy from json import dumps, loads as decode
+lazy from . import child
+lazy from ...package import (first, second as alias,)
+lazy import lazy as lazy
+lazy from lazy import lazy as lazy
+if enabled:
+    lazy import optional_module
+with context:
+    lazy from package import value
+
+--------------------------------------------------------------------------------
+
+(module
+  (lazy_import_statement
+    (import_statement
+      (dotted_name
+        (identifier))))
+  (lazy_import_statement
+    (import_statement
+      (aliased_import
+        (dotted_name
+          (identifier)
+          (identifier))
+        (identifier))
+      (dotted_name
+        (identifier))))
+  (lazy_import_statement
+    (import_from_statement
+      (dotted_name
+        (identifier))
+      (dotted_name
+        (identifier))
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier))))
+  (lazy_import_statement
+    (import_from_statement
+      (relative_import
+        (import_prefix))
+      (dotted_name
+        (identifier))))
+  (lazy_import_statement
+    (import_from_statement
+      (relative_import
+        (import_prefix)
+        (dotted_name
+          (identifier)))
+      (dotted_name
+        (identifier))
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier))))
+  (lazy_import_statement
+    (import_statement
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier))))
+  (lazy_import_statement
+    (import_from_statement
+      (dotted_name
+        (identifier))
+      (aliased_import
+        (dotted_name
+          (identifier))
+        (identifier))))
+  (if_statement
+    (identifier)
+    (block
+      (lazy_import_statement
+        (import_statement
+          (dotted_name
+            (identifier))))))
+  (with_statement
+    (with_clause
+      (with_item
+        (identifier)))
+    (block
+      (lazy_import_statement
+        (import_from_statement
+          (dotted_name
+            (identifier))
+          (dotted_name
+            (identifier)))))))
+
+================================================================================
+Lazy remains an identifier
+================================================================================
+lazy = 1
+lazy += 2
+lazy(lazy=lazy)
+obj.lazy = lazy
+import lazy
+from lazy import lazy as lazy
+def lazy(lazy):
+    return lazy
+class lazy:
+    lazy: lazy
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (assignment
+      (identifier)
+      (integer)))
+  (expression_statement
+    (augmented_assignment
+      (identifier)
+      (integer)))
+  (expression_statement
+    (call
+      (identifier)
+      (argument_list
+        (keyword_argument
+          (identifier)
+          (identifier)))))
+  (expression_statement
+    (assignment
+      (attribute
+        (identifier)
+        (identifier))
+      (identifier)))
+  (import_statement
+    (dotted_name
+      (identifier)))
+  (import_from_statement
+    (dotted_name
+      (identifier))
+    (aliased_import
+      (dotted_name
+        (identifier))
+      (identifier)))
+  (function_definition
+    (identifier)
+    (parameters
+      (identifier))
+    (block
+      (return_statement
+        (identifier))))
+  (class_definition
+    (identifier)
+    (block
+      (expression_statement
+        (assignment
+          (identifier)
+          (type
+            (identifier)))))))

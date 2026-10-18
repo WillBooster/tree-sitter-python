@@ -164,3 +164,5 @@
   "match"
   "case"
 ] @keyword
+
+(lazy_import_statement "lazy" @keyword)
