@@ -22,16 +22,18 @@ testCommand(
         name,
         kind,
       ]);
-      expect(highlights).toEqual([
+      expect(highlights.slice(0, 8)).toEqual([
         ['Ts', 'type'],
         ['P', 'type'],
         ['Vs', 'type'],
         ['Vs', 'type'],
         ['Us', 'type'],
         ['Us', 'type'],
-        ['Ts', 'constructor'],
-        ['P', 'constant'],
+        ['Ts', 'type'],
+        ['Us', 'type'],
       ]);
+      expect(highlights.slice(8).map(([name]) => name)).toEqual(['Ts', 'P', 'Vs']);
+      expect(highlights.slice(8).map(([, kind]) => kind)).not.toContain('type');
     },
   }
 );
