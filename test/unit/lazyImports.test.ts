@@ -12,10 +12,14 @@ test('highlights lazy only as an import modifier', () => {
     const html = execFileSync(
       path.join(root, 'script/tree-sitter'),
       ['highlight', '-p', root, '-H', '--layout', 'fragment', '--style', 'minimal', input],
-      { cwd: root, encoding: 'utf8' }
+      {
+        cwd: root,
+        encoding: 'utf8',
+        env: { ...process.env, TREE_SITTER_LIBDIR: path.join(root, '.tmp/tree-sitter-lib') },
+      }
     );
-    expect(html.match(/<span class='keyword'>lazy<\/span>/g)).toHaveLength(2);
-    expect(html.match(/<span class='variable'>lazy<\/span>/g)).toHaveLength(2);
+    const classes = [...html.matchAll(/<span class='([^']+)'>lazy<\/span>/g)].map(([, capture]) => capture);
+    expect(classes).toEqual(['keyword', 'keyword', 'variable', 'variable']);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
