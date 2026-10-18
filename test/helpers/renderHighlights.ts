@@ -4,6 +4,7 @@ import path from 'node:path';
 
 export function renderHighlights(source: string): string {
   const root = path.resolve(import.meta.dirname, '../..');
+  fs.mkdirSync(path.join(root, '.tmp'), { recursive: true });
   const directory = fs.mkdtempSync(path.join(root, '.tmp/highlights-'));
   const input = path.join(directory, 'input.py');
   try {
