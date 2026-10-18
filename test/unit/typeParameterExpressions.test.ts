@@ -65,3 +65,32 @@ test('default and bound subscripts preserve expression syntax', async () => {
     parser.delete();
   }
 });
+
+test('retains contextual names in defaulted type parameters', async () => {
+  await Parser.init();
+  const parser = new Parser().setLanguage(
+    await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'))
+  );
+  try {
+    for (const name of ['lazy', 'type', 'match', 'print', 'exec']) {
+      for (const parameter of [`${name} = int`, `*${name} = *tuple[int]`, `**${name} = [int]`]) {
+        for (const source of [
+          `class C[${parameter}]: pass`,
+          `def f[${parameter}](): pass`,
+          `type A[${parameter}] = int`,
+        ]) {
+          const tree = parser.parse(source)!;
+          try {
+            expect(tree.rootNode.hasError, source).toBe(false);
+            const [declaration] = tree.rootNode.descendantsOfType('default_type_parameter');
+            expect(declaration?.childForFieldName('name')?.text, source).toBe(name);
+          } finally {
+            tree.delete();
+          }
+        }
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});

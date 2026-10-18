@@ -407,12 +407,15 @@ module.exports = grammar({
         seq(
           choice(
             seq(
-              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier))),
+              field(
+                'name',
+                choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier))
+              ),
               optional(seq(':', field('bound', alias($._type_parameter_expression, $.type))))
             ),
             seq(
               '**',
-              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier)))
+              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)))
             )
           ),
           '=',
@@ -420,7 +423,7 @@ module.exports = grammar({
         ),
         seq(
           '*',
-          field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier))),
+          field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier))),
           '=',
           field(
             'value',

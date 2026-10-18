@@ -2179,6 +2179,10 @@
                                 {
                                   "type": "STRING",
                                   "value": "exec"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "lazy"
                                 }
                               ]
                             },
@@ -2257,6 +2261,10 @@
                                 {
                                   "type": "STRING",
                                   "value": "exec"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "lazy"
                                 }
                               ]
                             },
@@ -2326,6 +2334,10 @@
                         {
                           "type": "STRING",
                           "value": "exec"
+                        },
+                        {
+                          "type": "STRING",
+                          "value": "lazy"
                         }
                       ]
                     },
