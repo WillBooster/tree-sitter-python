@@ -867,7 +867,10 @@ module.exports = grammar({
     _not_escape_sequence: () => token.immediate('\\'),
 
     format_specifier: ($) =>
-      seq(':', repeat(choice(token(prec(1, /[^{}\n]+/)), alias($.interpolation, sym('format_expression'))))),
+      seq(
+        token(prec(1, ':')),
+        repeat(choice(token(prec(1, /[^{}\n]+/)), alias($.interpolation, sym('format_expression'))))
+      ),
 
     type_conversion: () => /![a-z]/,
 
