@@ -1626,6 +1626,491 @@ def more_generic[T, *Ts, **P]():
         (identifier)))))
 
 ================================================================================
+Type parameter defaults in class declarations
+================================================================================
+
+class Container[T = str]: pass
+class Bounded[T: int = int]: pass
+class Constrained[T: (int, str) = str]: pass
+class Pack[*Ts = *tuple[int, str]]: pass
+class Parameters[**P = [int, str]]: pass
+class AnyParameters[**P = ...]: pass
+class OtherParameters[**P = Q]: pass
+class Mixed[T, U = list[T], **P = []]: pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (tuple
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (list_splat
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier))
+                (type
+                  (identifier))))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))
+            (type
+              (identifier))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (ellipsis))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (type
+        (identifier))
+      (default_type_parameter
+        (identifier)
+        (type
+          (generic_type
+            (identifier)
+            (type_parameter
+              (type
+                (identifier))))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (list))))
+    (block
+      (pass_statement))))
+
+================================================================================
+Type parameter defaults in function declarations
+================================================================================
+
+def factory[T = str]() -> T: pass
+async def bounded[T: int = int, **P = [str]](*args: P.args) -> T: pass
+def pack[*Ts = *tuple[int, ...]](*args: *Ts): pass
+def expression[T = int if enabled else str](): pass
+def callable_default[T = lambda x: x](): pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))))
+    (parameters)
+    (type
+      (identifier))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))
+        (type
+          (identifier)))
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))))))
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (type
+          (attribute
+            (identifier)
+            (identifier)))))
+    (type
+      (identifier))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (list_splat
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier))
+                (type
+                  (ellipsis))))))))
+    (parameters
+      (typed_parameter
+        (list_splat_pattern
+          (identifier))
+        (splat_type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier)))))
+    (parameters)
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (lambda
+            (lambda_parameters
+              (identifier))
+            (identifier)))))
+    (parameters)
+    (block
+      (pass_statement))))
+
+================================================================================
+Type parameter defaults in type aliases
+================================================================================
+
+type Sequence[T = str] = list[T]
+type Bounded[T: int = int] = T
+type Constrained[T: (int, str) = str] = T
+type Pack[*Ts = *tuple[int, str]] = tuple[*Ts]
+type Params[**P = [int, str]] = Callable[P, int]
+type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
+
+--------------------------------------------------------------------------------
+
+(module
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (identifier))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (identifier))))))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (identifier))
+            (type
+              (identifier))))))
+    (type
+      (identifier)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (tuple
+                (type
+                  (identifier))
+                (type
+                  (identifier))))
+            (type
+              (identifier))))))
+    (type
+      (identifier)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (list_splat
+              (type
+                (generic_type
+                  (identifier)
+                  (type_parameter
+                    (type
+                      (identifier))
+                    (type
+                      (identifier))))))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (splat_type
+            (identifier))))))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (list
+                (type
+                  (identifier))
+                (type
+                  (identifier))))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (identifier))
+          (type
+            (identifier))))))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (generic_type
+                (identifier)
+                (type_parameter
+                  (type
+                    (identifier))
+                  (type
+                    (identifier)))))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (splat_type
+            (identifier)))))))
+
+================================================================================
+Contextual keyword names in defaulted type parameters
+================================================================================
+
+class C[type = int, match: int = int, print = str, exec = bytes]: pass
+def f[match = int, *type = *tuple[int], **print = [str]](): pass
+type A[print = int, *exec = *tuple[str], **match = ...] = print
+
+--------------------------------------------------------------------------------
+
+(module
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier)))
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))
+        (type
+          (identifier)))
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier)))
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier)))
+      (default_type_parameter
+        (identifier)
+        (list_splat
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier)))))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))))))
+    (parameters)
+    (block
+      (pass_statement)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (type
+              (identifier)))
+          (default_type_parameter
+            (identifier)
+            (list_splat
+              (type
+                (generic_type
+                  (identifier)
+                  (type_parameter
+                    (type
+                      (identifier)))))))
+          (default_type_parameter
+            (identifier)
+            (type
+              (ellipsis))))))
+    (type
+      (identifier))))
+
+================================================================================
+Type parameter defaults preserve expression alternatives
+================================================================================
+class C[T = list[int] if flag else str, U = list[int](value)]: pass
+class D[T = (int,), U = (int, str,), **P = [str,]]: pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (conditional_expression
+            (subscript
+              (identifier)
+              (identifier))
+            (identifier)
+            (identifier))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (call
+            (subscript
+              (identifier)
+              (identifier))
+            (argument_list
+              (identifier))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (tuple
+            (type
+              (identifier)))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (tuple
+            (type
+              (identifier))
+            (type
+              (identifier)))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))))))
+    (block
+      (pass_statement))))
+
+================================================================================
 Lazy imports
 ================================================================================
 lazy import json
