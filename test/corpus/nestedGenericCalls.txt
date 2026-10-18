@@ -1,0 +1,95 @@
+================================================================================
+Calls and continuations inside nested generic annotations
+================================================================================
+
+v: Annotated[K, T[F]()]
+def f(x: Outer[Inner[T](value)]) -> Outer[Inner[T]().attr]: pass
+type Alias = Outer[Inner[T]()[key]]
+v: Outer[Inner[T]().method(arg)]
+following = 1
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (type
+              (identifier))
+            (type
+              (call
+                (subscript
+                  (identifier)
+                  (identifier))
+                (argument_list))))))))
+  (function_definition
+    (identifier)
+    (parameters
+      (typed_parameter
+        (identifier)
+        (type
+          (generic_type
+            (identifier)
+            (type_parameter
+              (type
+                (call
+                  (subscript
+                    (identifier)
+                    (identifier))
+                  (argument_list
+                    (identifier)))))))))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (attribute
+              (call
+                (subscript
+                  (identifier)
+                  (identifier))
+                (argument_list))
+              (identifier))))))
+    (block
+      (pass_statement)))
+  (type_alias_statement
+    (type
+      (identifier))
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (type
+            (subscript
+              (call
+                (subscript
+                  (identifier)
+                  (identifier))
+                (argument_list))
+              (identifier)))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (type
+        (generic_type
+          (identifier)
+          (type_parameter
+            (type
+              (call
+                (attribute
+                  (call
+                    (subscript
+                      (identifier)
+                      (identifier))
+                    (argument_list))
+                  (identifier))
+                (argument_list
+                  (identifier)))))))))
+  (expression_statement
+    (assignment
+      (identifier)
+      (integer))))

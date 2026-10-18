@@ -51,6 +51,7 @@ module.exports = grammar({
     [$.named_expression, $.as_pattern],
     [$.print_statement, $.primary_expression],
     [$.match_statement, $.primary_expression],
+    [$.primary_expression, $.generic_type],
   ],
 
   supertypes: ($) => [
@@ -143,8 +144,6 @@ module.exports = grammar({
     module: ($) => repeat($._statement),
 
     _statement: ($) => choice($._simple_statements, $._compound_statement),
-
-    // Simple statements
 
     _simple_statements: ($) => seq(sep1($._simple_statement, SEMICOLON), optional(SEMICOLON), sym('_newline')),
 
@@ -243,8 +242,6 @@ module.exports = grammar({
     pass_statement: () => prec.left('pass'),
     break_statement: () => prec.left('break'),
     continue_statement: () => prec.left('continue'),
-
-    // Compound statements
 
     _compound_statement: ($) =>
       choice(
@@ -434,8 +431,6 @@ module.exports = grammar({
 
     dotted_name: ($) => prec(1, sep1($.identifier, '.')),
 
-    // Match cases
-
     case_pattern: ($) => prec(1, choice(alias($._as_pattern, $.as_pattern), $.keyword_pattern, $._simple_pattern)),
 
     _simple_pattern: ($) =>
@@ -482,8 +477,6 @@ module.exports = grammar({
     complex_pattern: ($) =>
       prec(1, seq(optional('-'), choice($.integer, $.float), choice('+', '-'), choice($.integer, $.float))),
 
-    // Patterns
-
     _parameters: ($) => seq(commaSep1($.parameter), optional(',')),
 
     _patterns: ($) => seq(commaSep1($.pattern), optional(',')),
@@ -529,12 +522,8 @@ module.exports = grammar({
 
     dictionary_splat_pattern: ($) => seq('**', choice($.identifier, $.keyword_identifier, $.subscript, $.attribute)),
 
-    // Extended patterns (patterns allowed in match statement are far more flexible than simple patterns though still a subset of "expression")
-
     as_pattern: ($) =>
       prec.left(seq($.expression, 'as', field('alias', alias($.expression, sym('as_pattern_target'))))),
-
-    // Expressions
 
     _expression_within_for_in_clause: ($) => choice($.expression, alias($.lambda_within_for_in_clause, $.lambda)),
 
@@ -749,7 +738,7 @@ module.exports = grammar({
     type: ($) => choice(prec(1, $.expression), $.generic_type, $.union_type, $.constrained_type, $.member_type),
     splat_type: ($) => prec(1, seq(choice('*', '**'), $.identifier)),
     generic_type: ($) =>
-      prec(
+      prec.dynamic(
         1,
         seq(choice($.identifier, alias('type', $.identifier)), alias($._generic_type_arguments, $.type_parameter))
       ),
@@ -759,8 +748,6 @@ module.exports = grammar({
 
     keyword_argument: ($) =>
       seq(field('name', choice($.identifier, $.keyword_identifier)), '=', field('value', $.expression)),
-
-    // Literals
 
     list: ($) => seq('[', optional($._collection_elements), ']'),
 
@@ -883,13 +870,7 @@ module.exports = grammar({
           seq(choice('0x', '0X'), repeat1(/_?[A-Fa-f0-9]+/), optional(/[Ll]/)),
           seq(choice('0o', '0O'), repeat1(/_?[0-7]+/), optional(/[Ll]/)),
           seq(choice('0b', '0B'), repeat1(/_?[0-1]+/), optional(/[Ll]/)),
-          seq(
-            repeat1(/[0-9]+_?/),
-            choice(
-              optional(/[Ll]/), // long numbers
-              optional(/[jJ]/) // complex numbers
-            )
-          )
+          seq(repeat1(/[0-9]+_?/), choice(optional(/[Ll]/), optional(/[jJ]/)))
         )
       ),
 
@@ -940,8 +921,6 @@ module.exports = grammar({
 Object.assign(module.exports, { PREC });
 
 /**
- * Creates a rule to match one or more of the rules separated by a comma
- *
  * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} rule
  *
  * @returns {import('@willbooster/web-tree-sitter/dsl').SeqRule}
@@ -951,8 +930,6 @@ function commaSep1(rule) {
 }
 
 /**
- * Creates a rule to match one or more occurrences of `rule` separated by `sep`
- *
  * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} rule
  *
  * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} separator
