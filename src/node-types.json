@@ -721,6 +721,10 @@
           "named": true
         },
         {
+          "type": "lazy_import_statement",
+          "named": true
+        },
+        {
           "type": "match_statement",
           "named": true
         },
@@ -2377,6 +2381,25 @@
     }
   },
   {
+    "type": "lazy_import_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "import_from_statement",
+          "named": true
+        },
+        {
+          "type": "import_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "list",
     "named": true,
     "fields": {},
@@ -2634,6 +2657,10 @@
         },
         {
           "type": "import_statement",
+          "named": true
+        },
+        {
+          "type": "lazy_import_statement",
           "named": true
         },
         {
@@ -3928,6 +3955,10 @@
   },
   {
     "type": "lambda",
+    "named": false
+  },
+  {
+    "type": "lazy",
     "named": false
   },
   {

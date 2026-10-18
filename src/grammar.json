@@ -82,6 +82,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "lazy_import_statement"
+        },
+        {
+          "type": "SYMBOL",
           "name": "import_from_statement"
         },
         {
@@ -148,6 +152,28 @@
         {
           "type": "SYMBOL",
           "name": "_import_list"
+        }
+      ]
+    },
+    "lazy_import_statement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "lazy"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "import_statement"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "import_from_statement"
+            }
+          ]
         }
       ]
     },
@@ -7154,6 +7180,10 @@
               {
                 "type": "STRING",
                 "value": "match"
+              },
+              {
+                "type": "STRING",
+                "value": "lazy"
               }
             ]
           },

@@ -158,6 +158,7 @@ module.exports = grammar({
       choice(
         $.future_import_statement,
         $.import_statement,
+        $.lazy_import_statement,
         $.import_from_statement,
         $.print_statement,
         $.assert_statement,
@@ -175,6 +176,8 @@ module.exports = grammar({
       ),
 
     import_statement: ($) => seq('import', $._import_list),
+
+    lazy_import_statement: ($) => seq('lazy', choice($.import_statement, $.import_from_statement)),
 
     import_prefix: () => repeat1('.'),
 
@@ -1017,7 +1020,7 @@ module.exports = grammar({
     keyword_identifier: ($) =>
       choice(
         prec(-3, alias(choice('print', 'exec', 'async', 'await'), $.identifier)),
-        alias(choice('type', 'match'), $.identifier)
+        alias(choice('type', 'match', 'lazy'), $.identifier)
       ),
 
     true: () => 'True',
