@@ -50,10 +50,15 @@ test('renders nested default and bound type names with the type highlight', () =
       'class K[T = tuple[*tuple[int]]]: pass',
       'class L[T = match[int]]: pass',
       'class M[T = lazy.List[int]]: pass',
+      'class N[T = pkg.types.Value, U = other.models.Box[Leaf]]: pass',
     ].join('\n')
   );
   expect(html.match(/<span class='type'>(?:int|str)<\/span>/g)).toHaveLength(30);
   expect(html).not.toMatch(/<span class='variable'>(?:int|str)<\/span>/);
   expect(html).toContain("<span class='type'>Protocol</span>");
   expect(html).toContain("<span class='type'>List</span>");
+  for (const name of ['typing', 'lazy', 'pkg', 'types', 'Value', 'other', 'models', 'Box', 'Leaf']) {
+    expect(html).toContain(`<span class='type'>${name}</span>`);
+    expect(html).not.toContain(`<span class='variable'>${name}</span>`);
+  }
 }, 180_000);
