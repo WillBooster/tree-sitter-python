@@ -1682,13 +1682,14 @@ class Mixed[T, U = list[T], **P = []]: pass
       (default_type_parameter
         (identifier)
         (list_splat
-          (generic_type
-            (identifier)
-            (type_parameter
-              (type
-                (identifier))
-              (type
-                (identifier)))))))
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier))
+                (type
+                  (identifier))))))))
     (block
       (pass_statement)))
   (class_definition
@@ -1800,13 +1801,14 @@ def callable_default[T = lambda x: x](): pass
       (default_type_parameter
         (identifier)
         (list_splat
-          (generic_type
-            (identifier)
-            (type_parameter
-              (type
-                (identifier))
-              (type
-                (ellipsis)))))))
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier))
+                (type
+                  (ellipsis))))))))
     (parameters
       (typed_parameter
         (list_splat_pattern
@@ -1909,13 +1911,14 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
           (default_type_parameter
             (identifier)
             (list_splat
-              (generic_type
-                (identifier)
-                (type_parameter
-                  (type
-                    (identifier))
-                  (type
-                    (identifier)))))))))
+              (type
+                (generic_type
+                  (identifier)
+                  (type_parameter
+                    (type
+                      (identifier))
+                    (type
+                      (identifier))))))))))
     (type
       (generic_type
         (identifier)
@@ -2009,11 +2012,12 @@ type A[print = int, *exec = *tuple[str], **match = ...] = print
       (default_type_parameter
         (identifier)
         (list_splat
-          (generic_type
-            (identifier)
-            (type_parameter
-              (type
-                (identifier))))))
+          (type
+            (generic_type
+              (identifier)
+              (type_parameter
+                (type
+                  (identifier)))))))
       (default_type_parameter
         (identifier)
         (type
@@ -2035,11 +2039,12 @@ type A[print = int, *exec = *tuple[str], **match = ...] = print
           (default_type_parameter
             (identifier)
             (list_splat
-              (generic_type
-                (identifier)
-                (type_parameter
-                  (type
-                    (identifier))))))
+              (type
+                (generic_type
+                  (identifier)
+                  (type_parameter
+                    (type
+                      (identifier)))))))
           (default_type_parameter
             (identifier)
             (type

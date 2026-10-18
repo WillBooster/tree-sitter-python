@@ -9,6 +9,17 @@ test('default and bound subscripts preserve expression syntax', async () => {
   try {
     const valid = [
       'list[dict[str, int]]',
+      'typing.List[int]',
+      'list[int] | None',
+      '(list[int] | None)',
+      'int | str | None',
+      'typing.Dict[str, typing.List[int | str]]',
+      'list[int] | str if flag else bytes',
+      'factory()[int] | str',
+      'list[int] & str',
+      'list[int] | str & bytes',
+      'list[int] | str + bytes',
+      'list[int] | str == bytes',
       'a[:]',
       'a[::]',
       'a[1:2:3]',
@@ -39,7 +50,7 @@ test('default and bound subscripts preserve expression syntax', async () => {
           `class C[T = ${value}]: pass`,
           `def f[T: ${value} = int](): pass`,
           `type A[T = ${value}] = T`,
-          ...(value.includes(' if ') ? [] : [`class C[*Ts = *${value}]: pass`]),
+          ...(value.includes(' if ') || value.includes(' == ') ? [] : [`class C[*Ts = *${value}]: pass`]),
         ]) {
           const tree = parser.parse(source)!;
           try {

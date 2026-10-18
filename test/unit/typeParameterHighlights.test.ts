@@ -45,6 +45,13 @@ test('renders nested default and bound type names with the type highlight', () =
         'class C[T: list[dict[str, int]] = list[dict[str, int]]]: pass',
         'def f[*Ts = *tuple[int, str], **P = [str]](): pass',
         'type A[T: (int, str) = list[int]] = T',
+        'class D[T: list[int] | None = list[str] | None]: pass',
+        'class E[T: int | str = typing.List[int]]: pass',
+        'class F[T = typing.Dict[str, typing.List[int | str]]]: pass',
+        'class G[T = (list[int] | None), **P = [typing.List[str] | None]]: pass',
+        'class H[T = int | str | None, *Ts = *typing.Tuple[int, str]]: pass',
+        'class I[*Ts = *(typing.Tuple[int] | tuple[str])]: pass',
+        'class J[T: typing.Protocol = typing.List[int]]: pass',
       ].join('\n')
     );
     const html = execFileSync(
@@ -52,8 +59,10 @@ test('renders nested default and bound type names with the type highlight', () =
       ['highlight', '-p', root, '-H', '--layout', 'fragment', '--style', 'minimal', input],
       { cwd: root, encoding: 'utf8' }
     );
-    expect(html.match(/<span class='type'>(?:int|str)<\/span>/g)).toHaveLength(10);
+    expect(html.match(/<span class='type'>(?:int|str)<\/span>/g)).toHaveLength(27);
     expect(html).not.toMatch(/<span class='variable'>(?:int|str)<\/span>/);
+    expect(html).toContain("<span class='type'>Protocol</span>");
+    expect(html).toContain("<span class='type'>List</span>");
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

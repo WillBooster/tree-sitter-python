@@ -2031,6 +2031,10 @@
           "named": true
         },
         {
+          "type": "member_type",
+          "named": true
+        },
+        {
           "type": "type_parameter",
           "named": true
         }
@@ -2469,10 +2473,6 @@
           "named": true
         },
         {
-          "type": "generic_type",
-          "named": true
-        },
-        {
           "type": "lambda",
           "named": true
         },
@@ -2482,6 +2482,10 @@
         },
         {
           "type": "primary_expression",
+          "named": true
+        },
+        {
+          "type": "type",
           "named": true
         }
       ]
@@ -2550,6 +2554,10 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "member_type",
           "named": true
         },
         {
@@ -2804,6 +2812,10 @@
       "types": [
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "type",
           "named": true
         },
         {

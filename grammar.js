@@ -44,7 +44,9 @@ module.exports = grammar({
 
   conflicts: ($) => [
     [$.default_type_parameter, $.primary_expression],
+    [$.primary_expression, $._default_type_primary],
     [$.primary_expression, $._default_generic_type],
+    [$.primary_expression, $._default_member_type],
     [$.list, $._default_type_list],
     [$._type_parameter_expression, $.expression],
     [$.primary_expression, $.pattern],
@@ -424,19 +426,40 @@ module.exports = grammar({
         )
       ),
 
-    _type_parameter_expression: ($) =>
+    _type_parameter_expression: ($) => choice($._expression_without_named_expression, prec.dynamic(1, $._default_type)),
+
+    _default_type: ($) => choice($._default_type_primary, alias($._default_union_type, $.union_type)),
+
+    _default_type_primary: ($) =>
       choice(
-        $._expression_without_named_expression,
+        $.identifier,
+        $.keyword_identifier,
+        $.none,
+        $.string,
+        alias($._default_member_type, $.member_type),
         alias($._default_generic_type, $.generic_type),
         alias($._default_type_list, $.list),
-        alias($._default_type_tuple, $.tuple)
+        alias($._default_type_tuple, $.tuple),
+        alias($._default_parenthesized_type, $.parenthesized_expression)
+      ),
+
+    _default_member_type: ($) =>
+      seq(
+        choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
+        '.',
+        $.identifier
       ),
 
     _default_generic_type: ($) =>
-      prec.dynamic(
-        1,
-        seq(choice($.identifier, alias('type', $.identifier)), alias($._default_type_arguments, $.type_parameter))
+      seq(
+        choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
+        alias($._default_type_arguments, $.type_parameter)
       ),
+
+    _default_union_type: ($) =>
+      prec.left(PREC.bitwise_or, seq(alias($._default_type, $.type), '|', alias($._default_type_primary, $.type))),
+
+    _default_parenthesized_type: ($) => seq('(', alias($._default_type, $.type), ')'),
 
     _default_type_arguments: ($) =>
       seq(
@@ -471,7 +494,7 @@ module.exports = grammar({
         )
       ),
 
-    _default_splat_type: ($) => seq('*', choice($.primary_expression, alias($._default_generic_type, $.generic_type))),
+    _default_splat_type: ($) => seq('*', choice($.primary_expression, prec.dynamic(1, alias($._default_type, $.type)))),
 
     _generic_type_arguments: ($) =>
       seq('[', commaSep1(choice($.type, alias($._list_splat_argument, $.splat_type))), optional(','), ']'),
