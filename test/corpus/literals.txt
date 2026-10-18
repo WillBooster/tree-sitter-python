@@ -1467,3 +1467,121 @@ Comprehension operands containing valid unpacking
       (for_in_clause
         (identifier)
         (identifier)))))
+
+================================================================================
+F-string format alignment and assignment expressions
+================================================================================
+f"{a:=.3f}s"
+f"{num=:=10d}"
+f"{a:=10}"
+f"{(a:=10)}"
+f"{(a:=10):=10}"
+f"{a!s:=10}"
+f"{a:{width:=10}}"
+f"{a[(width:=1)]:=10}"
+f"{(lambda x: x)(a):=10}"
+f"{a:}"
+f"{a:>10}"
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier))
+      (string_content)
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (integer))))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (parenthesized_expression
+          (named_expression
+            (identifier)
+            (integer)))
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (type_conversion)
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier
+          (format_expression
+            (identifier)
+            (format_specifier))))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (subscript
+          (identifier)
+          (parenthesized_expression
+            (named_expression
+              (identifier)
+              (integer))))
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (call
+          (parenthesized_expression
+            (lambda
+              (lambda_parameters
+                (identifier))
+              (identifier)))
+          (argument_list
+            (identifier)))
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier))
+      (string_end)))
+  (expression_statement
+    (string
+      (string_start)
+      (interpolation
+        (identifier)
+        (format_specifier))
+      (string_end))))
