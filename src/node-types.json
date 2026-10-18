@@ -1308,6 +1308,46 @@
     }
   },
   {
+    "type": "default_type_parameter",
+    "named": true,
+    "fields": {
+      "bound": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "list_splat",
+            "named": true
+          },
+          {
+            "type": "type",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "delete_statement",
     "named": true,
     "fields": {},
@@ -1995,6 +2035,10 @@
           "named": true
         },
         {
+          "type": "member_type",
+          "named": true
+        },
+        {
           "type": "type_parameter",
           "named": true
         }
@@ -2370,6 +2414,10 @@
         {
           "type": "list_splat",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -2458,6 +2506,10 @@
         {
           "type": "primary_expression",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -2525,6 +2577,10 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "member_type",
           "named": true
         },
         {
@@ -2786,6 +2842,10 @@
           "named": true
         },
         {
+          "type": "type",
+          "named": true
+        },
+        {
           "type": "yield",
           "named": true
         }
@@ -3029,6 +3089,10 @@
         {
           "type": "primary_expression",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -3162,6 +3226,10 @@
         {
           "type": "list_splat",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -3203,10 +3271,6 @@
         },
         {
           "type": "generic_type",
-          "named": true
-        },
-        {
-          "type": "identifier",
           "named": true
         },
         {
@@ -3254,6 +3318,18 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "default_type_parameter",
+          "named": true
+        },
+        {
+          "type": "named_expression",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
         {
           "type": "splat_type",
           "named": true

@@ -43,6 +43,12 @@ module.exports = grammar({
   extras: ($) => [$.comment, /[\s\f\uFEFF\u2060\u200B]|\r?\n/, $.line_continuation],
 
   conflicts: ($) => [
+    [$.default_type_parameter, $.primary_expression],
+    [$.primary_expression, $._default_type_primary],
+    [$.primary_expression, $._default_generic_type],
+    [$.primary_expression, $._default_member_type],
+    [$.list, $._default_type_list],
+    [$._type_parameter_expression, $.expression],
     [$.primary_expression, $.pattern],
     [$.primary_expression, $.list_splat_pattern],
     [$.tuple, $.tuple_pattern],
@@ -94,6 +100,8 @@ module.exports = grammar({
     $._expressions,
     $._left_hand_side,
     $.keyword_identifier,
+    $._type_parameter_name,
+    $._default_member_base,
   ],
 
   reserved: {
@@ -393,7 +401,100 @@ module.exports = grammar({
         ':',
         field('body', $._suite)
       ),
-    type_parameter: ($) => seq('[', commaSep1(choice($.type, $.splat_type)), optional(','), ']'),
+    type_parameter: ($) =>
+      seq('[', commaSep1(choice($.type, $.splat_type, $.default_type_parameter)), optional(','), ']'),
+
+    default_type_parameter: ($) =>
+      choice(
+        seq(
+          choice(
+            seq(
+              field('name', $._type_parameter_name),
+              optional(seq(':', field('bound', alias($._type_parameter_expression, $.type))))
+            ),
+            seq('**', field('name', $._type_parameter_name))
+          ),
+          '=',
+          field('value', alias($._type_parameter_expression, $.type))
+        ),
+        seq(
+          '*',
+          field('name', $._type_parameter_name),
+          '=',
+          field(
+            'value',
+            choice(alias($._type_parameter_expression, $.type), alias($._default_splat_type, $.list_splat))
+          )
+        )
+      ),
+
+    _type_parameter_name: ($) =>
+      choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)),
+
+    _default_member_base: ($) => choice($._type_parameter_name, alias($._default_member_type, $.member_type)),
+
+    _type_parameter_expression: ($) => choice($._expression_without_named_expression, prec.dynamic(1, $._default_type)),
+
+    _default_type: ($) => choice($._default_type_primary, alias($._default_union_type, $.union_type)),
+
+    _default_type_primary: ($) =>
+      choice(
+        $.identifier,
+        $.keyword_identifier,
+        $.none,
+        $.string,
+        alias($._default_member_type, $.member_type),
+        alias($._default_generic_type, $.generic_type),
+        alias($._default_type_list, $.list),
+        alias($._default_type_tuple, $.tuple),
+        alias($._default_parenthesized_type, $.parenthesized_expression)
+      ),
+
+    _default_member_type: ($) => seq($._default_member_base, '.', $.identifier),
+
+    _default_generic_type: ($) => seq($._default_member_base, alias($._default_type_arguments, $.type_parameter)),
+
+    _default_union_type: ($) =>
+      prec.left(PREC.bitwise_or, seq(alias($._default_type, $.type), '|', alias($._default_type_primary, $.type))),
+
+    _default_parenthesized_type: ($) => seq('(', alias($._default_type, $.type), ')'),
+
+    _default_type_arguments: ($) =>
+      seq(
+        '[',
+        commaSep1(
+          choice(
+            alias($._type_parameter_expression, $.type),
+            $.named_expression,
+            alias($._default_splat_argument, $.splat_type),
+            $.slice
+          )
+        ),
+        optional(','),
+        ']'
+      ),
+
+    _default_splat_argument: ($) => seq('*', alias($._type_parameter_expression, $.type)),
+
+    _default_type_list: ($) =>
+      prec.dynamic(
+        1,
+        seq('[', optional(seq(commaSep1(alias($._type_parameter_expression, $.type)), optional(','))), ']')
+      ),
+
+    _default_type_tuple: ($) =>
+      prec.dynamic(
+        1,
+        seq(
+          '(',
+          alias($._type_parameter_expression, $.type),
+          ',',
+          optional(seq(commaSep1(alias($._type_parameter_expression, $.type)), optional(','))),
+          ')'
+        )
+      ),
+
+    _default_splat_type: ($) => seq('*', choice($.primary_expression, prec.dynamic(1, alias($._default_type, $.type)))),
 
     _generic_type_arguments: ($) =>
       seq('[', commaSep1(choice($.type, alias($._list_splat_argument, $.splat_type))), optional(','), ']'),

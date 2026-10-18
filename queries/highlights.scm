@@ -64,6 +64,9 @@
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
 (splat_type (identifier) @type)
+(member_type (identifier) @type)
+(generic_type (identifier) @type)
+(default_type_parameter name: (identifier) @type)
 
 ; Literals
 
