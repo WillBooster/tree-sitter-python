@@ -1312,27 +1312,7 @@
         "required": false,
         "types": [
           {
-            "type": "boolean_operator",
-            "named": true
-          },
-          {
-            "type": "comparison_operator",
-            "named": true
-          },
-          {
-            "type": "conditional_expression",
-            "named": true
-          },
-          {
-            "type": "lambda",
-            "named": true
-          },
-          {
-            "type": "not_operator",
-            "named": true
-          },
-          {
-            "type": "primary_expression",
+            "type": "type",
             "named": true
           }
         ]
@@ -1352,31 +1332,11 @@
         "required": true,
         "types": [
           {
-            "type": "boolean_operator",
-            "named": true
-          },
-          {
-            "type": "comparison_operator",
-            "named": true
-          },
-          {
-            "type": "conditional_expression",
-            "named": true
-          },
-          {
-            "type": "lambda",
-            "named": true
-          },
-          {
             "type": "list_splat",
             "named": true
           },
           {
-            "type": "not_operator",
-            "named": true
-          },
-          {
-            "type": "primary_expression",
+            "type": "type",
             "named": true
           }
         ]
@@ -2427,6 +2387,10 @@
         {
           "type": "list_splat",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -2502,6 +2466,10 @@
         },
         {
           "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "generic_type",
           "named": true
         },
         {
@@ -3215,6 +3183,10 @@
         {
           "type": "list_splat",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }
@@ -3256,10 +3228,6 @@
         },
         {
           "type": "generic_type",
-          "named": true
-        },
-        {
-          "type": "identifier",
           "named": true
         },
         {

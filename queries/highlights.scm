@@ -64,8 +64,6 @@
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
 (default_type_parameter name: (identifier) @type)
-(default_type_parameter bound: [(identifier) (subscript) (tuple)] @type)
-(default_type_parameter value: [(identifier) (subscript) (list) (tuple) (list_splat)] @type)
 
 ; Literals
 

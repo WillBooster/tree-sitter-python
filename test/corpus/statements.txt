@@ -1646,48 +1646,7 @@ class Mixed[T, U = list[T], **P = []]: pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier)))
-    (block
-      (pass_statement)))
-  (class_definition
-    (identifier)
-    (type_parameter
-      (default_type_parameter
-        (identifier)
-        (identifier)
-        (identifier)))
-    (block
-      (pass_statement)))
-  (class_definition
-    (identifier)
-    (type_parameter
-      (default_type_parameter
-        (identifier)
-        (tuple
-          (identifier)
-          (identifier))
-        (identifier)))
-    (block
-      (pass_statement)))
-  (class_definition
-    (identifier)
-    (type_parameter
-      (default_type_parameter
-        (identifier)
-        (list_splat
-          (subscript
-            (identifier)
-            (identifier)
-            (identifier)))))
-    (block
-      (pass_statement)))
-  (class_definition
-    (identifier)
-    (type_parameter
-      (default_type_parameter
-        (identifier)
-        (list
-          (identifier)
+        (type
           (identifier))))
     (block
       (pass_statement)))
@@ -1696,7 +1655,10 @@ class Mixed[T, U = list[T], **P = []]: pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (ellipsis)))
+        (type
+          (identifier))
+        (type
+          (identifier))))
     (block
       (pass_statement)))
   (class_definition
@@ -1704,7 +1666,60 @@ class Mixed[T, U = list[T], **P = []]: pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier)))
+        (type
+          (tuple
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
+          (identifier))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (list_splat
+          (generic_type
+            (identifier)
+            (type_parameter
+              (type
+                (identifier))
+              (type
+                (identifier)))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))
+            (type
+              (identifier))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (ellipsis))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (identifier))))
     (block
       (pass_statement)))
   (class_definition
@@ -1714,12 +1729,16 @@ class Mixed[T, U = list[T], **P = []]: pass
         (identifier))
       (default_type_parameter
         (identifier)
-        (subscript
-          (identifier)
-          (identifier)))
+        (type
+          (generic_type
+            (identifier)
+            (type_parameter
+              (type
+                (identifier))))))
       (default_type_parameter
         (identifier)
-        (list)))
+        (type
+          (list))))
     (block
       (pass_statement))))
 
@@ -1741,7 +1760,8 @@ def callable_default[T = lambda x: x](): pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier)))
+        (type
+          (identifier))))
     (parameters)
     (type
       (identifier))
@@ -1752,12 +1772,16 @@ def callable_default[T = lambda x: x](): pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier)
-        (identifier))
+        (type
+          (identifier))
+        (type
+          (identifier)))
       (default_type_parameter
         (identifier)
-        (list
-          (identifier))))
+        (type
+          (list
+            (type
+              (identifier))))))
     (parameters
       (typed_parameter
         (list_splat_pattern
@@ -1776,10 +1800,13 @@ def callable_default[T = lambda x: x](): pass
       (default_type_parameter
         (identifier)
         (list_splat
-          (subscript
+          (generic_type
             (identifier)
-            (identifier)
-            (ellipsis)))))
+            (type_parameter
+              (type
+                (identifier))
+              (type
+                (ellipsis)))))))
     (parameters
       (typed_parameter
         (list_splat_pattern
@@ -1793,10 +1820,11 @@ def callable_default[T = lambda x: x](): pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (conditional_expression
-          (identifier)
-          (identifier)
-          (identifier))))
+        (type
+          (conditional_expression
+            (identifier)
+            (identifier)
+            (identifier)))))
     (parameters)
     (block
       (pass_statement)))
@@ -1805,10 +1833,11 @@ def callable_default[T = lambda x: x](): pass
     (type_parameter
       (default_type_parameter
         (identifier)
-        (lambda
-          (lambda_parameters
-            (identifier))
-          (identifier))))
+        (type
+          (lambda
+            (lambda_parameters
+              (identifier))
+            (identifier)))))
     (parameters)
     (block
       (pass_statement))))
@@ -1834,7 +1863,8 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (default_type_parameter
             (identifier)
-            (identifier)))))
+            (type
+              (identifier))))))
     (type
       (generic_type
         (identifier)
@@ -1848,8 +1878,10 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (default_type_parameter
             (identifier)
-            (identifier)
-            (identifier)))))
+            (type
+              (identifier))
+            (type
+              (identifier))))))
     (type
       (identifier)))
   (type_alias_statement
@@ -1859,10 +1891,14 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (default_type_parameter
             (identifier)
-            (tuple
-              (identifier)
-              (identifier))
-            (identifier)))))
+            (type
+              (tuple
+                (type
+                  (identifier))
+                (type
+                  (identifier))))
+            (type
+              (identifier))))))
     (type
       (identifier)))
   (type_alias_statement
@@ -1873,10 +1909,13 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
           (default_type_parameter
             (identifier)
             (list_splat
-              (subscript
+              (generic_type
                 (identifier)
-                (identifier)
-                (identifier)))))))
+                (type_parameter
+                  (type
+                    (identifier))
+                  (type
+                    (identifier)))))))))
     (type
       (generic_type
         (identifier)
@@ -1890,9 +1929,12 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (default_type_parameter
             (identifier)
-            (list
-              (identifier)
-              (identifier))))))
+            (type
+              (list
+                (type
+                  (identifier))
+                (type
+                  (identifier))))))))
     (type
       (generic_type
         (identifier)
@@ -1908,10 +1950,14 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (default_type_parameter
             (identifier)
-            (subscript
-              (identifier)
-              (identifier)
-              (identifier))))))
+            (type
+              (generic_type
+                (identifier)
+                (type_parameter
+                  (type
+                    (identifier))
+                  (type
+                    (identifier)))))))))
     (type
       (generic_type
         (identifier)
@@ -1935,17 +1981,22 @@ type A[print = int, *exec = *tuple[str], **match = ...] = print
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier))
+        (type
+          (identifier)))
       (default_type_parameter
         (identifier)
-        (identifier)
-        (identifier))
+        (type
+          (identifier))
+        (type
+          (identifier)))
       (default_type_parameter
         (identifier)
-        (identifier))
+        (type
+          (identifier)))
       (default_type_parameter
         (identifier)
-        (identifier)))
+        (type
+          (identifier))))
     (block
       (pass_statement)))
   (function_definition
@@ -1953,17 +2004,22 @@ type A[print = int, *exec = *tuple[str], **match = ...] = print
     (type_parameter
       (default_type_parameter
         (identifier)
-        (identifier))
+        (type
+          (identifier)))
       (default_type_parameter
         (identifier)
         (list_splat
-          (subscript
+          (generic_type
             (identifier)
-            (identifier))))
+            (type_parameter
+              (type
+                (identifier))))))
       (default_type_parameter
         (identifier)
-        (list
-          (identifier))))
+        (type
+          (list
+            (type
+              (identifier))))))
     (parameters)
     (block
       (pass_statement)))
@@ -1974,15 +2030,77 @@ type A[print = int, *exec = *tuple[str], **match = ...] = print
         (type_parameter
           (default_type_parameter
             (identifier)
-            (identifier))
+            (type
+              (identifier)))
           (default_type_parameter
             (identifier)
             (list_splat
-              (subscript
+              (generic_type
                 (identifier)
-                (identifier))))
+                (type_parameter
+                  (type
+                    (identifier))))))
           (default_type_parameter
             (identifier)
-            (ellipsis)))))
+            (type
+              (ellipsis))))))
     (type
       (identifier))))
+
+================================================================================
+Type parameter defaults preserve expression alternatives
+================================================================================
+class C[T = list[int] if flag else str, U = list[int](value)]: pass
+class D[T = (int,), U = (int, str,), **P = [str,]]: pass
+
+--------------------------------------------------------------------------------
+
+(module
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (conditional_expression
+            (subscript
+              (identifier)
+              (identifier))
+            (identifier)
+            (identifier))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (call
+            (subscript
+              (identifier)
+              (identifier))
+            (argument_list
+              (identifier))))))
+    (block
+      (pass_statement)))
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (type
+          (tuple
+            (type
+              (identifier)))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (tuple
+            (type
+              (identifier))
+            (type
+              (identifier)))))
+      (default_type_parameter
+        (identifier)
+        (type
+          (list
+            (type
+              (identifier))))))
+    (block
+      (pass_statement))))
