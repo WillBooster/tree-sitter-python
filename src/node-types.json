@@ -3089,6 +3089,10 @@
         {
           "type": "primary_expression",
           "named": true
+        },
+        {
+          "type": "type",
+          "named": true
         }
       ]
     }

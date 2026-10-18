@@ -2321,16 +2321,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "identifier"
-        },
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "STRING",
-            "value": "type"
-          },
-          "named": true,
-          "value": "identifier"
+          "name": "_type_parameter_name"
         },
         {
           "type": "ALIAS",
@@ -2562,7 +2553,7 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "_list_splat_argument"
+                    "name": "_default_splat_argument"
                   },
                   "named": true,
                   "value": "splat_type"
@@ -2602,7 +2593,7 @@
                         "type": "ALIAS",
                         "content": {
                           "type": "SYMBOL",
-                          "name": "_list_splat_argument"
+                          "name": "_default_splat_argument"
                         },
                         "named": true,
                         "value": "splat_type"
@@ -2633,6 +2624,24 @@
         {
           "type": "STRING",
           "value": "]"
+        }
+      ]
+    },
+    "_default_splat_argument": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "*"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_type_parameter_expression"
+          },
+          "named": true,
+          "value": "type"
         }
       ]
     },

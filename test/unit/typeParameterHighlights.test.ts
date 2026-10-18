@@ -52,6 +52,9 @@ test('renders nested default and bound type names with the type highlight', () =
         'class H[T = int | str | None, *Ts = *typing.Tuple[int, str]]: pass',
         'class I[*Ts = *(typing.Tuple[int] | tuple[str])]: pass',
         'class J[T: typing.Protocol = typing.List[int]]: pass',
+        'class K[T = tuple[*tuple[int]]]: pass',
+        'class L[T = match[int]]: pass',
+        'class M[T = lazy.List[int]]: pass',
       ].join('\n')
     );
     const html = execFileSync(
@@ -59,7 +62,7 @@ test('renders nested default and bound type names with the type highlight', () =
       ['highlight', '-p', root, '-H', '--layout', 'fragment', '--style', 'minimal', input],
       { cwd: root, encoding: 'utf8' }
     );
-    expect(html.match(/<span class='type'>(?:int|str)<\/span>/g)).toHaveLength(27);
+    expect(html.match(/<span class='type'>(?:int|str)<\/span>/g)).toHaveLength(30);
     expect(html).not.toMatch(/<span class='variable'>(?:int|str)<\/span>/);
     expect(html).toContain("<span class='type'>Protocol</span>");
     expect(html).toContain("<span class='type'>List</span>");

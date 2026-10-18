@@ -431,8 +431,7 @@ module.exports = grammar({
     _type_parameter_name: ($) =>
       choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)),
 
-    _default_member_base: ($) =>
-      choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
+    _default_member_base: ($) => choice($._type_parameter_name, alias($._default_member_type, $.member_type)),
 
     _type_parameter_expression: ($) => choice($._expression_without_named_expression, prec.dynamic(1, $._default_type)),
 
@@ -467,13 +466,15 @@ module.exports = grammar({
           choice(
             alias($._type_parameter_expression, $.type),
             $.named_expression,
-            alias($._list_splat_argument, $.splat_type),
+            alias($._default_splat_argument, $.splat_type),
             $.slice
           )
         ),
         optional(','),
         ']'
       ),
+
+    _default_splat_argument: ($) => seq('*', alias($._type_parameter_expression, $.type)),
 
     _default_type_list: ($) =>
       prec.dynamic(
