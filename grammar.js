@@ -6,8 +6,10 @@
  * @see {@link https://docs.python.org/3/reference/grammar.html|Python 3 grammar}
  */
 
-/// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
+
+const { grammar, seq, choice, repeat, repeat1, optional, token, prec, alias, field, sym } =
+  /** @type {typeof globalThis & import('@willbooster/web-tree-sitter/dsl').DSL} */ (globalThis);
 
 const PREC = {
   // this resolves a conflict between the usage of ':' in a lambda vs in a
@@ -60,21 +62,21 @@ module.exports = grammar({
     $.parameter,
   ],
 
-  externals: ($) => [
-    $._newline,
-    $._indent,
-    $._dedent,
-    $.string_start,
-    $._string_content,
-    $.escape_interpolation,
-    $.string_end,
+  externals: () => [
+    sym('_newline'),
+    sym('_indent'),
+    sym('_dedent'),
+    sym('string_start'),
+    sym('_string_content'),
+    sym('escape_interpolation'),
+    sym('string_end'),
 
     // Mark comments as external tokens so that the external scanner is always
     // invoked, even if no external token is expected. This allows for better
     // error recovery, because the external scanner can maintain the overall
     // structure by returning dedent tokens whenever a dedent occurs, even
     // if no dedent is expected.
-    $.comment,
+    sym('comment'),
 
     // Allow the external scanner to check for the validity of closing brackets
     // so that it can avoid returning dedent tokens between brackets.
@@ -144,7 +146,7 @@ module.exports = grammar({
 
     // Simple statements
 
-    _simple_statements: ($) => seq(sep1($._simple_statement, SEMICOLON), optional(SEMICOLON), $._newline),
+    _simple_statements: ($) => seq(sep1($._simple_statement, SEMICOLON), optional(SEMICOLON), sym('_newline')),
 
     _simple_statement: ($) =>
       choice(
@@ -278,7 +280,8 @@ module.exports = grammar({
       );
     },
 
-    _match_block: ($) => choice(seq($._indent, repeat(field('alternative', $.case_clause)), $._dedent), $._newline),
+    _match_block: ($) =>
+      choice(seq(sym('_indent'), repeat(field('alternative', $.case_clause)), sym('_dedent')), sym('_newline')),
 
     case_clause: ($) =>
       seq(
@@ -416,11 +419,12 @@ module.exports = grammar({
     decorated_definition: ($) =>
       seq(repeat1($.decorator), field('definition', choice($.class_definition, $.function_definition))),
 
-    decorator: ($) => seq('@', $.expression, $._newline),
+    decorator: ($) => seq('@', $.expression, sym('_newline')),
 
-    _suite: ($) => choice(alias($._simple_statements, $.block), seq($._indent, $.block), alias($._newline, $.block)),
+    _suite: ($) =>
+      choice(alias($._simple_statements, $.block), seq(sym('_indent'), $.block), alias(sym('_newline'), $.block)),
 
-    block: ($) => seq(repeat($._statement), $._dedent),
+    block: ($) => seq(repeat($._statement), sym('_dedent')),
 
     expression_list: ($) =>
       prec.dynamic(1, prec.right(seq(choice($.expression, $.list_splat), ',', optional($._collection_elements)))),
@@ -524,7 +528,8 @@ module.exports = grammar({
 
     // Extended patterns (patterns allowed in match statement are far more flexible than simple patterns though still a subset of "expression")
 
-    as_pattern: ($) => prec.left(seq($.expression, 'as', field('alias', alias($.expression, $.as_pattern_target)))),
+    as_pattern: ($) =>
+      prec.left(seq($.expression, 'as', field('alias', alias($.expression, sym('as_pattern_target'))))),
 
     // Expressions
 
@@ -594,8 +599,7 @@ module.exports = grammar({
       ),
 
     binary_operator: ($) => {
-      /* oxlint-disable typescript/unbound-method -- prec.left and prec.right do not use `this`. */
-      /** @type {[typeof prec.left | typeof prec.right, string, number][]} */
+      /** @type {[import('@willbooster/web-tree-sitter/dsl').DSL['prec']['left' | 'right'], string, number][]} */
       const table = [
         [prec.left, '+', PREC.plus],
         [prec.left, '-', PREC.plus],
@@ -823,10 +827,12 @@ module.exports = grammar({
 
     concatenated_string: ($) => seq($.string, repeat1($.string)),
 
-    string: ($) => seq($.string_start, repeat(choice($.interpolation, $.string_content)), $.string_end),
+    string: ($) => seq(sym('string_start'), repeat(choice($.interpolation, $.string_content)), sym('string_end')),
 
     string_content: ($) =>
-      prec.right(repeat1(choice($.escape_interpolation, $.escape_sequence, $._not_escape_sequence, $._string_content))),
+      prec.right(
+        repeat1(choice(sym('escape_interpolation'), $.escape_sequence, $._not_escape_sequence, sym('_string_content')))
+      ),
 
     interpolation: ($) =>
       seq(
@@ -862,7 +868,7 @@ module.exports = grammar({
     _not_escape_sequence: () => token.immediate('\\'),
 
     format_specifier: ($) =>
-      seq(':', repeat(choice(token(prec(1, /[^{}\n]+/)), alias($.interpolation, $.format_expression)))),
+      seq(':', repeat(choice(token(prec(1, /[^{}\n]+/)), alias($.interpolation, sym('format_expression'))))),
 
     type_conversion: () => /![a-z]/,
 
@@ -931,9 +937,9 @@ Object.assign(module.exports, { PREC });
 /**
  * Creates a rule to match one or more of the rules separated by a comma
  *
- * @param {RuleOrLiteral} rule
+ * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} rule
  *
- * @returns {SeqRule}
+ * @returns {import('@willbooster/web-tree-sitter/dsl').SeqRule}
  */
 function commaSep1(rule) {
   return sep1(rule, ',');
@@ -942,11 +948,11 @@ function commaSep1(rule) {
 /**
  * Creates a rule to match one or more occurrences of `rule` separated by `sep`
  *
- * @param {RuleOrLiteral} rule
+ * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} rule
  *
- * @param {RuleOrLiteral} separator
+ * @param {import('@willbooster/web-tree-sitter/dsl').RuleOrLiteral} separator
  *
- * @returns {SeqRule}
+ * @returns {import('@willbooster/web-tree-sitter/dsl').SeqRule}
  */
 function sep1(rule, separator) {
   return seq(rule, repeat(seq(separator, rule)));
