@@ -100,6 +100,8 @@ module.exports = grammar({
     $._expressions,
     $._left_hand_side,
     $.keyword_identifier,
+    $._type_parameter_name,
+    $._default_member_base,
   ],
 
   reserved: {
@@ -407,23 +409,17 @@ module.exports = grammar({
         seq(
           choice(
             seq(
-              field(
-                'name',
-                choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier))
-              ),
+              field('name', $._type_parameter_name),
               optional(seq(':', field('bound', alias($._type_parameter_expression, $.type))))
             ),
-            seq(
-              '**',
-              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)))
-            )
+            seq('**', field('name', $._type_parameter_name))
           ),
           '=',
           field('value', alias($._type_parameter_expression, $.type))
         ),
         seq(
           '*',
-          field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier))),
+          field('name', $._type_parameter_name),
           '=',
           field(
             'value',
@@ -431,6 +427,12 @@ module.exports = grammar({
           )
         )
       ),
+
+    _type_parameter_name: ($) =>
+      choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)),
+
+    _default_member_base: ($) =>
+      choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
 
     _type_parameter_expression: ($) => choice($._expression_without_named_expression, prec.dynamic(1, $._default_type)),
 
@@ -449,18 +451,9 @@ module.exports = grammar({
         alias($._default_parenthesized_type, $.parenthesized_expression)
       ),
 
-    _default_member_type: ($) =>
-      seq(
-        choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
-        '.',
-        $.identifier
-      ),
+    _default_member_type: ($) => seq($._default_member_base, '.', $.identifier),
 
-    _default_generic_type: ($) =>
-      seq(
-        choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
-        alias($._default_type_arguments, $.type_parameter)
-      ),
+    _default_generic_type: ($) => seq($._default_member_base, alias($._default_type_arguments, $.type_parameter)),
 
     _default_union_type: ($) =>
       prec.left(PREC.bitwise_or, seq(alias($._default_type, $.type), '|', alias($._default_type_primary, $.type))),
