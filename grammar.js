@@ -615,7 +615,6 @@ module.exports = grammar({
         [prec.left, '<<', PREC.shift],
         [prec.left, '>>', PREC.shift],
       ];
-      /* oxlint-enable typescript/unbound-method */
 
       return choice(
         ...table.map(([fn, operator, precedence]) =>
