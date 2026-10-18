@@ -399,17 +399,20 @@ module.exports = grammar({
         seq(
           choice(
             seq(
-              field('name', choice($.identifier, $.keyword_identifier)),
+              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier))),
               optional(seq(':', field('bound', $._expression_without_named_expression)))
             ),
-            seq('**', field('name', choice($.identifier, $.keyword_identifier)))
+            seq(
+              '**',
+              field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier)))
+            )
           ),
           '=',
           field('value', $._expression_without_named_expression)
         ),
         seq(
           '*',
-          field('name', choice($.identifier, $.keyword_identifier)),
+          field('name', choice($.identifier, alias(choice('type', 'match', 'print', 'exec'), $.identifier))),
           '=',
           field('value', choice($._expression_without_named_expression, $.list_splat))
         )

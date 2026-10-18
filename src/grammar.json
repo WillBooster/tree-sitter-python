@@ -2134,8 +2134,30 @@
                             "name": "identifier"
                           },
                           {
-                            "type": "SYMBOL",
-                            "name": "keyword_identifier"
+                            "type": "ALIAS",
+                            "content": {
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "STRING",
+                                  "value": "type"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "match"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "print"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "exec"
+                                }
+                              ]
+                            },
+                            "named": true,
+                            "value": "identifier"
                           }
                         ]
                       }
@@ -2185,8 +2207,30 @@
                             "name": "identifier"
                           },
                           {
-                            "type": "SYMBOL",
-                            "name": "keyword_identifier"
+                            "type": "ALIAS",
+                            "content": {
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "STRING",
+                                  "value": "type"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "match"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "print"
+                                },
+                                {
+                                  "type": "STRING",
+                                  "value": "exec"
+                                }
+                              ]
+                            },
+                            "named": true,
+                            "value": "identifier"
                           }
                         ]
                       }
@@ -2227,8 +2271,30 @@
                     "name": "identifier"
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "keyword_identifier"
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "STRING",
+                          "value": "type"
+                        },
+                        {
+                          "type": "STRING",
+                          "value": "match"
+                        },
+                        {
+                          "type": "STRING",
+                          "value": "print"
+                        },
+                        {
+                          "type": "STRING",
+                          "value": "exec"
+                        }
+                      ]
+                    },
+                    "named": true,
+                    "value": "identifier"
                   }
                 ]
               }

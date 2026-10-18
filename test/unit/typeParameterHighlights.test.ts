@@ -27,6 +27,29 @@ test('highlights defaulted type parameter names, bounds, and direct defaults as 
         tree.delete();
       }
     }
+    for (const source of [
+      'class C[T: list[dict[str, int]] = list[dict[str, int]]]: pass',
+      'def f[*Ts = *tuple[int, str], **P = [str]](): pass',
+      'type A[T: (int, str) = list[int]] = T',
+    ]) {
+      const tree = parser.parse(source)!;
+      try {
+        expect(tree.rootNode.hasError, source).toBe(false);
+        const types = query.captures(tree.rootNode).filter((capture) => capture.name === 'type');
+        for (const identifier of tree.rootNode.descendantsOfType('identifier')) {
+          if (['int', 'str'].includes(identifier.text)) {
+            expect(
+              types.some(
+                ({ node }) => node.startIndex <= identifier.startIndex && node.endIndex >= identifier.endIndex
+              ),
+              source
+            ).toBe(true);
+          }
+        }
+      } finally {
+        tree.delete();
+      }
+    }
   } finally {
     query.delete();
     parser.delete();
