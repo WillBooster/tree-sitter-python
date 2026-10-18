@@ -7,3 +7,4 @@ class D(typing.Generic[*Us]): pass
 Ts = 1
 P = 2
 values = [*Vs]
+lookup = table[*keys]
