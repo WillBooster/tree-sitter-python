@@ -399,17 +399,17 @@ module.exports = grammar({
         seq(
           choice(
             seq(
-              field('name', $.identifier),
+              field('name', choice($.identifier, $.keyword_identifier)),
               optional(seq(':', field('bound', $._expression_without_named_expression)))
             ),
-            seq('**', field('name', $.identifier))
+            seq('**', field('name', choice($.identifier, $.keyword_identifier)))
           ),
           '=',
           field('value', $._expression_without_named_expression)
         ),
         seq(
           '*',
-          field('name', $.identifier),
+          field('name', choice($.identifier, $.keyword_identifier)),
           '=',
           field('value', choice($._expression_without_named_expression, $.list_splat))
         )

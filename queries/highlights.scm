@@ -63,6 +63,9 @@
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
+(default_type_parameter name: (identifier) @type)
+(default_type_parameter bound: (identifier) @type)
+(default_type_parameter value: (identifier) @type)
 
 ; Literals
 

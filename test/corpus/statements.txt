@@ -1918,3 +1918,71 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (type_parameter
           (splat_type
             (identifier)))))))
+
+================================================================================
+Contextual keyword names in defaulted type parameters
+================================================================================
+
+class C[type = int, match: int = int, print = str, exec = bytes]: pass
+def f[match = int, *type = *tuple[int], **print = [str]](): pass
+type A[print = int, *exec = *tuple[str], **match = ...] = print
+
+--------------------------------------------------------------------------------
+
+(module
+  (class_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (identifier))
+      (default_type_parameter
+        (identifier)
+        (identifier)
+        (identifier))
+      (default_type_parameter
+        (identifier)
+        (identifier))
+      (default_type_parameter
+        (identifier)
+        (identifier)))
+    (block
+      (pass_statement)))
+  (function_definition
+    (identifier)
+    (type_parameter
+      (default_type_parameter
+        (identifier)
+        (identifier))
+      (default_type_parameter
+        (identifier)
+        (list_splat
+          (subscript
+            (identifier)
+            (identifier))))
+      (default_type_parameter
+        (identifier)
+        (list
+          (identifier))))
+    (parameters)
+    (block
+      (pass_statement)))
+  (type_alias_statement
+    (type
+      (generic_type
+        (identifier)
+        (type_parameter
+          (default_type_parameter
+            (identifier)
+            (identifier))
+          (default_type_parameter
+            (identifier)
+            (list_splat
+              (subscript
+                (identifier)
+                (identifier))))
+          (default_type_parameter
+            (identifier)
+            (ellipsis)))))
+    (type
+      (identifier))))
