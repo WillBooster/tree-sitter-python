@@ -63,6 +63,7 @@
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
+(type_parameter (splat_type (identifier) @type))
 
 ; Literals
 
