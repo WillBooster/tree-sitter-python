@@ -2408,13 +2408,117 @@
             "type": "ALIAS",
             "content": {
               "type": "SYMBOL",
-              "name": "_generic_type_arguments"
+              "name": "_default_type_arguments"
             },
             "named": true,
             "value": "type_parameter"
           }
         ]
       }
+    },
+    "_default_type_arguments": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "["
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_type_parameter_expression"
+                  },
+                  "named": true,
+                  "value": "type"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "named_expression"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_list_splat_argument"
+                  },
+                  "named": true,
+                  "value": "splat_type"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "slice"
+                }
+              ]
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ","
+                  },
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_type_parameter_expression"
+                        },
+                        "named": true,
+                        "value": "type"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "named_expression"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_list_splat_argument"
+                        },
+                        "named": true,
+                        "value": "splat_type"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "slice"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ","
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "STRING",
+          "value": "]"
+        }
+      ]
     },
     "_default_type_list": {
       "type": "PREC_DYNAMIC",

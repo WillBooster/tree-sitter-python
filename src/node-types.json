@@ -3280,6 +3280,14 @@
           "named": true
         },
         {
+          "type": "named_expression",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "splat_type",
           "named": true
         },

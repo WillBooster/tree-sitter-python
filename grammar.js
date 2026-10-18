@@ -435,7 +435,22 @@ module.exports = grammar({
     _default_generic_type: ($) =>
       prec.dynamic(
         1,
-        seq(choice($.identifier, alias('type', $.identifier)), alias($._generic_type_arguments, $.type_parameter))
+        seq(choice($.identifier, alias('type', $.identifier)), alias($._default_type_arguments, $.type_parameter))
+      ),
+
+    _default_type_arguments: ($) =>
+      seq(
+        '[',
+        commaSep1(
+          choice(
+            alias($._type_parameter_expression, $.type),
+            $.named_expression,
+            alias($._list_splat_argument, $.splat_type),
+            $.slice
+          )
+        ),
+        optional(','),
+        ']'
       ),
 
     _default_type_list: ($) =>
