@@ -191,8 +191,23 @@ module.exports = grammar({
 
     print_statement: ($) =>
       choice(
-        prec(1, seq('print', $.chevron, repeat(seq(',', field('argument', $.expression))), optional(','))),
-        prec(-3, prec.dynamic(-1, seq('print', commaSep1(field('argument', $.expression)), optional(','))))
+        // Python 3 reads these statements as expression lists, which can unpack their elements.
+        prec(
+          1,
+          seq(
+            'print',
+            $.chevron,
+            repeat(seq(',', field('argument', choice($.expression, $.list_splat)))),
+            optional(',')
+          )
+        ),
+        prec(
+          -3,
+          prec.dynamic(
+            -1,
+            seq('print', commaSep1(field('argument', choice($.expression, $.list_splat))), optional(','))
+          )
+        )
       ),
 
     chevron: ($) => seq('>>', $.expression),

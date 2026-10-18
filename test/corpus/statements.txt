@@ -155,6 +155,7 @@ Print statements with redirection
 
 print >> a
 print >> a, "b", "c"
+print >> a, *b, c
 
 --------------------------------------------------------------------------------
 
@@ -172,7 +173,13 @@ print >> a, "b", "c"
     (string
       (string_start)
       (string_content)
-      (string_end))))
+      (string_end)))
+  (print_statement
+    (chevron
+      (identifier))
+    (list_splat
+      (identifier))
+    (identifier)))
 
 ================================================================================
 Assert statements

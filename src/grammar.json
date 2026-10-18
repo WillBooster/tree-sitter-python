@@ -409,8 +409,17 @@
                       "type": "FIELD",
                       "name": "argument",
                       "content": {
-                        "type": "SYMBOL",
-                        "name": "expression"
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SYMBOL",
+                            "name": "expression"
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "list_splat"
+                          }
+                        ]
                       }
                     }
                   ]
@@ -451,8 +460,17 @@
                       "type": "FIELD",
                       "name": "argument",
                       "content": {
-                        "type": "SYMBOL",
-                        "name": "expression"
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "SYMBOL",
+                            "name": "expression"
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "list_splat"
+                          }
+                        ]
                       }
                     },
                     {
@@ -468,8 +486,17 @@
                             "type": "FIELD",
                             "name": "argument",
                             "content": {
-                              "type": "SYMBOL",
-                              "name": "expression"
+                              "type": "CHOICE",
+                              "members": [
+                                {
+                                  "type": "SYMBOL",
+                                  "name": "expression"
+                                },
+                                {
+                                  "type": "SYMBOL",
+                                  "name": "list_splat"
+                                }
+                              ]
                             }
                           }
                         ]

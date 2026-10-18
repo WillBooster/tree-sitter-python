@@ -2801,6 +2801,10 @@
           {
             "type": "expression",
             "named": true
+          },
+          {
+            "type": "list_splat",
+            "named": true
           }
         ]
       }
