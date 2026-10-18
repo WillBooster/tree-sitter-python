@@ -1304,6 +1304,86 @@
     }
   },
   {
+    "type": "default_type_parameter",
+    "named": true,
+    "fields": {
+      "bound": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "boolean_operator",
+            "named": true
+          },
+          {
+            "type": "comparison_operator",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "not_operator",
+            "named": true
+          },
+          {
+            "type": "primary_expression",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "boolean_operator",
+            "named": true
+          },
+          {
+            "type": "comparison_operator",
+            "named": true
+          },
+          {
+            "type": "conditional_expression",
+            "named": true
+          },
+          {
+            "type": "lambda",
+            "named": true
+          },
+          {
+            "type": "list_splat",
+            "named": true
+          },
+          {
+            "type": "not_operator",
+            "named": true
+          },
+          {
+            "type": "primary_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "delete_statement",
     "named": true,
     "fields": {},
@@ -3227,6 +3307,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "default_type_parameter",
+          "named": true
+        },
         {
           "type": "splat_type",
           "named": true

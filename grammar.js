@@ -43,6 +43,7 @@ module.exports = grammar({
   extras: ($) => [$.comment, /[\s\f\uFEFF\u2060\u200B]|\r?\n/, $.line_continuation],
 
   conflicts: ($) => [
+    [$.default_type_parameter, $.primary_expression],
     [$.primary_expression, $.pattern],
     [$.primary_expression, $.list_splat_pattern],
     [$.tuple, $.tuple_pattern],
@@ -390,7 +391,29 @@ module.exports = grammar({
         ':',
         field('body', $._suite)
       ),
-    type_parameter: ($) => seq('[', commaSep1(choice($.type, $.splat_type)), optional(','), ']'),
+    type_parameter: ($) =>
+      seq('[', commaSep1(choice($.type, $.splat_type, $.default_type_parameter)), optional(','), ']'),
+
+    default_type_parameter: ($) =>
+      choice(
+        seq(
+          choice(
+            seq(
+              field('name', $.identifier),
+              optional(seq(':', field('bound', $._expression_without_named_expression)))
+            ),
+            seq('**', field('name', $.identifier))
+          ),
+          '=',
+          field('value', $._expression_without_named_expression)
+        ),
+        seq(
+          '*',
+          field('name', $.identifier),
+          '=',
+          field('value', choice($._expression_without_named_expression, $.list_splat))
+        )
+      ),
 
     _generic_type_arguments: ($) =>
       seq('[', commaSep1(choice($.type, alias($._list_splat_argument, $.splat_type))), optional(','), ']'),

@@ -2055,6 +2055,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "splat_type"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "default_type_parameter"
                 }
               ]
             },
@@ -2077,6 +2081,10 @@
                       {
                         "type": "SYMBOL",
                         "name": "splat_type"
+                      },
+                      {
+                        "type": "SYMBOL",
+                        "name": "default_type_parameter"
                       }
                     ]
                   }
@@ -2100,6 +2108,126 @@
         {
           "type": "STRING",
           "value": "]"
+        }
+      ]
+    },
+    "default_type_parameter": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "FIELD",
+                      "name": "name",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "identifier"
+                      }
+                    },
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SEQ",
+                          "members": [
+                            {
+                              "type": "STRING",
+                              "value": ":"
+                            },
+                            {
+                              "type": "FIELD",
+                              "name": "bound",
+                              "content": {
+                                "type": "SYMBOL",
+                                "name": "_expression_without_named_expression"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "**"
+                    },
+                    {
+                      "type": "FIELD",
+                      "name": "name",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "identifier"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "="
+            },
+            {
+              "type": "FIELD",
+              "name": "value",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_expression_without_named_expression"
+              }
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "*"
+            },
+            {
+              "type": "FIELD",
+              "name": "name",
+              "content": {
+                "type": "SYMBOL",
+                "name": "identifier"
+              }
+            },
+            {
+              "type": "STRING",
+              "value": "="
+            },
+            {
+              "type": "FIELD",
+              "name": "value",
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_expression_without_named_expression"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "list_splat"
+                  }
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -6488,6 +6616,10 @@
     }
   ],
   "conflicts": [
+    [
+      "default_type_parameter",
+      "primary_expression"
+    ],
     [
       "primary_expression",
       "pattern"
