@@ -69,7 +69,6 @@ examples/cpython/Lib/test/test_lazy_import/data/pkg/c.py
 examples/cpython/Lib/test/test_lazy_import/data/relative_lazy.py
 examples/cpython/Lib/test/test_lazy_import/data/relative_lazy_from.py
 examples/cpython/Lib/test/test_patma.py
-examples/cpython/Lib/test/test_type_params.py
 examples/cpython/Lib/test/tokenizedata/badsyntax_3131.py
 examples/cpython/Lib/tokenize.py
 examples/cpython/Lib/traceback.py
