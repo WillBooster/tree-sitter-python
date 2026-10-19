@@ -46,6 +46,9 @@ module.exports = grammar({
     [$.default_type_parameter, $.primary_expression],
     [$.primary_expression, $._default_type_primary],
     [$.primary_expression, $._default_generic_type],
+    [$._default_generic_type, $.primary_expression, $.generic_type],
+    [$._default_type_arguments, $.expression],
+    [$._default_type_arguments, $._generic_type_arguments],
     [$.primary_expression, $._default_member_type],
     [$.list, $._default_type_list],
     [$._type_parameter_expression, $.expression],
@@ -494,7 +497,14 @@ module.exports = grammar({
     _default_splat_type: ($) => seq('*', choice($.primary_expression, prec.dynamic(1, alias($._default_type, $.type)))),
 
     _generic_type_arguments: ($) =>
-      seq('[', commaSep1(choice($.type, alias($._default_splat_argument, $.splat_type))), optional(','), ']'),
+      seq(
+        '[',
+        commaSep1(
+          choice($.type, alias($._type_parameter_expression, $.type), alias($._default_splat_argument, $.splat_type))
+        ),
+        optional(','),
+        ']'
+      ),
 
     argument_list: ($) =>
       seq(
