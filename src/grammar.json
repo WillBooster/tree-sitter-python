@@ -2864,6 +2864,15 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
+                    "name": "_type_parameter_expression"
+                  },
+                  "named": true,
+                  "value": "type"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
                     "name": "_default_splat_argument"
                   },
                   "named": true,
@@ -2886,6 +2895,15 @@
                       {
                         "type": "SYMBOL",
                         "name": "type"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_type_parameter_expression"
+                        },
+                        "named": true,
+                        "value": "type"
                       },
                       {
                         "type": "ALIAS",
@@ -7259,6 +7277,19 @@
     [
       "primary_expression",
       "_default_generic_type"
+    ],
+    [
+      "_default_generic_type",
+      "primary_expression",
+      "generic_type"
+    ],
+    [
+      "_default_type_arguments",
+      "expression"
+    ],
+    [
+      "_default_type_arguments",
+      "_generic_type_arguments"
     ],
     [
       "primary_expression",
