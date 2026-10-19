@@ -1516,7 +1516,8 @@ type IntOrStrSequence[T: (int, str)] = Sequence[T]  # TypeVar with constraints
           (type
             (identifier))
           (splat_type
-            (identifier))))))
+            (type
+              (identifier)))))))
   (comment)
   (type_alias_statement
     (type
@@ -1607,7 +1608,8 @@ def more_generic[T, *Ts, **P]():
                           (type
                             (identifier))
                           (splat_type
-                            (identifier))))))))
+                            (type
+                              (identifier)))))))))
               (type
                 (generic_type
                   (identifier)
@@ -1621,7 +1623,8 @@ def more_generic[T, *Ts, **P]():
                           (type
                             (identifier))
                           (splat_type
-                            (identifier))))))))))))
+                            (type
+                              (identifier)))))))))))))
       (return_statement
         (identifier)))))
 
@@ -1814,7 +1817,8 @@ def callable_default[T = lambda x: x](): pass
         (list_splat_pattern
           (identifier))
         (splat_type
-          (identifier))))
+          (type
+            (identifier)))))
     (block
       (pass_statement)))
   (function_definition
@@ -1924,7 +1928,8 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (identifier)
         (type_parameter
           (splat_type
-            (identifier))))))
+            (type
+              (identifier)))))))
   (type_alias_statement
     (type
       (generic_type
@@ -1966,7 +1971,8 @@ type OtherPack[*Ts = tuple[int, str]] = tuple[*Ts]
         (identifier)
         (type_parameter
           (splat_type
-            (identifier)))))))
+            (type
+              (identifier))))))))
 
 ================================================================================
 Contextual keyword names in defaulted type parameters

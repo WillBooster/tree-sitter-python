@@ -2864,7 +2864,7 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "_list_splat_argument"
+                    "name": "_default_splat_argument"
                   },
                   "named": true,
                   "value": "splat_type"
@@ -2891,7 +2891,7 @@
                         "type": "ALIAS",
                         "content": {
                           "type": "SYMBOL",
-                          "name": "_list_splat_argument"
+                          "name": "_default_splat_argument"
                         },
                         "named": true,
                         "value": "splat_type"
@@ -5709,7 +5709,7 @@
                       "type": "ALIAS",
                       "content": {
                         "type": "SYMBOL",
-                        "name": "list_splat"
+                        "name": "_default_splat_type"
                       },
                       "named": true,
                       "value": "splat_type"
@@ -5798,6 +5798,15 @@
                 },
                 "named": true,
                 "value": "identifier"
+              },
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_default_member_type"
+                },
+                "named": true,
+                "value": "member_type"
               }
             ]
           },
