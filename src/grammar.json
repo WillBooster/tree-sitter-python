@@ -5778,7 +5778,7 @@
       }
     },
     "generic_type": {
-      "type": "PREC",
+      "type": "PREC_DYNAMIC",
       "value": 1,
       "content": {
         "type": "SEQ",
@@ -7294,6 +7294,10 @@
     [
       "match_statement",
       "primary_expression"
+    ],
+    [
+      "primary_expression",
+      "generic_type"
     ]
   ],
   "precedences": [],
