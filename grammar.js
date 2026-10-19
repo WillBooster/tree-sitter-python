@@ -740,7 +740,7 @@ module.exports = grammar({
       prec.left(
         PREC.compare,
         seq(
-          $.primary_expression,
+          field('operands', $.primary_expression),
           repeat1(
             seq(
               field(
@@ -759,7 +759,7 @@ module.exports = grammar({
                   alias($._is_not, 'is not')
                 )
               ),
-              $.primary_expression
+              field('operands', $.primary_expression)
             )
           )
         )
