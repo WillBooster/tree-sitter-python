@@ -3,14 +3,15 @@ import path from 'node:path';
 import { Edit, Language, Parser, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
+import { generationInputMtime } from '../helpers/generationInputs.js';
+
 const root = path.resolve(import.meta.dirname, '../..');
 const wasmPath = path.join(root, 'tree-sitter-python.wasm');
 const artifactTime = fs.statSync(wasmPath).mtimeMs;
-if (
-  ['grammar.js', 'src/scanner.c', 'src/parser.c'].some(
-    (source) => fs.statSync(path.join(root, source)).mtimeMs > artifactTime
-  )
-) {
+const sourceTimes = ['grammar.js', 'src/scanner.c', 'src/parser.c', 'src/tree_sitter/parser.h'].map(
+  (source) => fs.statSync(path.join(root, source)).mtimeMs
+);
+if (Math.max(generationInputMtime(root), ...sourceTimes) > artifactTime) {
   throw new Error('Parser artifact is stale; run bun run build/ci before testing comparison operands.');
 }
 await Parser.init();
