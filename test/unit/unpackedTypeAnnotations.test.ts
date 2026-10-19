@@ -125,3 +125,38 @@ test('incrementally reparses nested qualified unpacks with the same type capture
     parser.delete();
   }
 });
+
+test('exposes qualified generic bases without unpacking through the public tree API', () => {
+  const parser = new Parser().setLanguage(language);
+  const query = new Query(language, highlights);
+  try {
+    for (const [source, baseText, baseTree] of [
+      ['value: typing.Tuple[int, str] = None', 'typing.Tuple', '(member_type (identifier) (identifier))'],
+      ['def f(value: a.b.C[int]): pass', 'a.b.C', '(member_type (member_type (identifier) (identifier)) (identifier))'],
+    ]) {
+      const tree = parser.parse(source!)!;
+      try {
+        expect(tree.rootNode.hasError, source).toBe(false);
+        const generic = tree.rootNode.descendantsOfType('generic_type')[0];
+        expect(generic?.namedChild(0)?.text, source).toBe(baseText);
+        expect(generic?.namedChild(0)?.toString(), source).toBe(baseTree);
+        expect(generic?.namedChild(1)?.type, source).toBe('type_parameter');
+        expect(tree.rootNode.descendantsOfType('splat_type')).toHaveLength(0);
+        const typeNames = query
+          .captures(tree.rootNode)
+          .filter(({ name }) => name === 'type')
+          .map(({ node }) => node.text);
+        expect(typeNames).toContain(baseText!.split('.').at(-1));
+        expect(typeNames).toContain('int');
+        for (const qualifier of baseText!.split('.').slice(0, -1)) {
+          expect(typeNames).not.toContain(qualifier);
+        }
+      } finally {
+        tree.delete();
+      }
+    }
+  } finally {
+    query.delete();
+    parser.delete();
+  }
+});
