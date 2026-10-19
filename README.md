@@ -63,7 +63,7 @@ parser.setLanguage(await Language.load(python));
 
 The package also ships the queries in `queries/` and the node types in `src/node-types.json`.
 
-Qualified generic annotations use `generic_type` with a `member_type` base. Unpacked annotation and generic-argument operands use a `type` child inside `splat_type`, including nested generic types; expression-valued operands such as calls remain expressions inside that wrapper. Ordinary value unpacks keep their expression tree.
+Qualified generic annotations use `generic_type` with a `member_type` base. Structured unpacked annotations and unpacked generic arguments use a `type` child inside `splat_type`. Expression-valued starred parameter annotations, such as `*args: *factory()`, keep a direct expression child instead. Ordinary value unpacks keep their expression tree.
 
 In Rust, depend on the [crate](https://crates.io/crates/willbooster-tree-sitter-python) and on
 [willbooster-tree-sitter](https://crates.io/crates/willbooster-tree-sitter), the runtime this package is tested and
