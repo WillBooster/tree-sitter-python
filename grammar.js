@@ -494,7 +494,7 @@ module.exports = grammar({
     _default_splat_type: ($) => seq('*', choice($.primary_expression, prec.dynamic(1, alias($._default_type, $.type)))),
 
     _generic_type_arguments: ($) =>
-      seq('[', commaSep1(choice($.type, alias($._list_splat_argument, $.splat_type))), optional(','), ']'),
+      seq('[', commaSep1(choice($.type, alias($._default_splat_argument, $.splat_type))), optional(','), ']'),
 
     argument_list: ($) =>
       seq(
@@ -832,7 +832,7 @@ module.exports = grammar({
         PREC.typed_parameter,
         choice(
           seq(choice($.identifier, $.dictionary_splat_pattern), ':', field('type', $.type)),
-          seq($.list_splat_pattern, ':', field('type', choice($.type, alias($.list_splat, $.splat_type))))
+          seq($.list_splat_pattern, ':', field('type', choice($.type, alias($._default_splat_type, $.splat_type))))
         )
       ),
 
@@ -841,7 +841,10 @@ module.exports = grammar({
     generic_type: ($) =>
       prec.dynamic(
         1,
-        seq(choice($.identifier, alias('type', $.identifier)), alias($._generic_type_arguments, $.type_parameter))
+        seq(
+          choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
+          alias($._generic_type_arguments, $.type_parameter)
+        )
       ),
     union_type: ($) => prec.left(seq($.type, '|', $.type)),
     constrained_type: ($) => prec.right(seq($.type, ':', $.type)),

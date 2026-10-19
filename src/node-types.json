@@ -3067,26 +3067,6 @@
       "required": true,
       "types": [
         {
-          "type": "boolean_operator",
-          "named": true
-        },
-        {
-          "type": "comparison_operator",
-          "named": true
-        },
-        {
-          "type": "conditional_expression",
-          "named": true
-        },
-        {
-          "type": "lambda",
-          "named": true
-        },
-        {
-          "type": "not_operator",
-          "named": true
-        },
-        {
           "type": "primary_expression",
           "named": true
         },

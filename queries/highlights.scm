@@ -67,7 +67,8 @@
 (class_definition
   superclasses: (argument_list
     (subscript subscript: (list_splat (identifier) @type))))
-(member_type (identifier) @type)
+(type (member_type (identifier) @type .))
+(generic_type (member_type (identifier) @type .))
 (generic_type (identifier) @type)
 (default_type_parameter name: (identifier) @type)
 
