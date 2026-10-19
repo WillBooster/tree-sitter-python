@@ -57,8 +57,12 @@ test('renders nested default and bound type names with the type highlight', () =
   expect(html).not.toMatch(/<span class='variable'>(?:int|str)<\/span>/);
   expect(html).toContain("<span class='type'>Protocol</span>");
   expect(html).toContain("<span class='type'>List</span>");
-  for (const name of ['typing', 'lazy', 'pkg', 'types', 'Value', 'other', 'models', 'Box', 'Leaf']) {
+  for (const name of ['Value', 'Box', 'Leaf']) {
     expect(html).toContain(`<span class='type'>${name}</span>`);
     expect(html).not.toContain(`<span class='variable'>${name}</span>`);
+  }
+  for (const name of ['typing', 'lazy', 'pkg', 'types', 'other', 'models']) {
+    expect(html).toContain(`<span class='variable'>${name}</span>`);
+    expect(html).not.toContain(`<span class='type'>${name}</span>`);
   }
 }, 180_000);

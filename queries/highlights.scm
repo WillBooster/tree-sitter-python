@@ -63,7 +63,8 @@
 
 (attribute attribute: (identifier) @property)
 (type (identifier) @type)
-(member_type (identifier) @type)
+(type (member_type (identifier) @type .))
+(generic_type (member_type (identifier) @type .))
 (generic_type (identifier) @type)
 (default_type_parameter name: (identifier) @type)
 

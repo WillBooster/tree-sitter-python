@@ -39,6 +39,10 @@ testCommand(
       ]);
       expect(captures.slice(7).map(([name]) => name)).toEqual(['Va', 'Vb']);
       expect(captures.slice(7).map(([, kind]) => kind)).not.toContain('type');
+      const qualifiers = [...html.matchAll(/<span class='([^']+)'>(typing|collections|abc)<\/span>/g)];
+      expect(qualifiers.map((match) => match[2])).toEqual(['typing', 'typing', 'collections', 'abc', 'typing']);
+      expect(qualifiers.map(([, kind]) => kind)).not.toContain('type');
+      expect(html).toContain("<span class='type'>Mapping</span>");
     },
   }
 );
