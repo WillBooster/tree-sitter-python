@@ -18,7 +18,7 @@ testCommand(
   170_000,
   {
     check: (html) => {
-      const highlights = [...html.matchAll(/<span class='([^']+)'>(Ts|P|Us|Vs|keys)<\/span>/g)].map(
+      const highlights = [...html.matchAll(/<span class='([^']+)'>(Ts|P|Us|Vs|keys|idx)<\/span>/g)].map(
         ([, kind, name]) => [name, kind]
       );
       expect(highlights.slice(0, 8)).toEqual([
@@ -31,7 +31,7 @@ testCommand(
         ['Ts', 'type'],
         ['Us', 'type'],
       ]);
-      expect(highlights.slice(8).map(([name]) => name)).toEqual(['Ts', 'P', 'Vs', 'keys']);
+      expect(highlights.slice(8).map(([name]) => name)).toEqual(['Ts', 'P', 'Vs', 'keys', 'idx']);
       expect(highlights.slice(8).map(([, kind]) => kind)).not.toContain('type');
     },
   }
