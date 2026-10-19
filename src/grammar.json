@@ -2299,20 +2299,34 @@
               },
               {
                 "type": "STRING",
-                "value": "print"
-              },
-              {
-                "type": "STRING",
-                "value": "exec"
-              },
-              {
-                "type": "STRING",
                 "value": "lazy"
               }
             ]
           },
           "named": true,
           "value": "identifier"
+        },
+        {
+          "type": "PREC",
+          "value": -3,
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "print"
+                },
+                {
+                  "type": "STRING",
+                  "value": "exec"
+                }
+              ]
+            },
+            "named": true,
+            "value": "identifier"
+          }
         }
       ]
     },
@@ -5802,31 +5816,8 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "identifier"
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "STRING",
-                  "value": "type"
-                },
-                "named": true,
-                "value": "identifier"
-              },
-              {
-                "type": "ALIAS",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_default_member_type"
-                },
-                "named": true,
-                "value": "member_type"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_default_member_base"
           },
           {
             "type": "ALIAS",
@@ -7304,6 +7295,10 @@
       "expression"
     ],
     [
+      "list_splat",
+      "_type_parameter_expression"
+    ],
+    [
       "primary_expression",
       "pattern"
     ],
@@ -7330,6 +7325,11 @@
     [
       "print_statement",
       "primary_expression"
+    ],
+    [
+      "print_statement",
+      "primary_expression",
+      "generic_type"
     ],
     [
       "match_statement",
