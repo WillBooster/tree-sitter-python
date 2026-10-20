@@ -11,11 +11,17 @@ test('parses deeply indented strings without aborting', () => {
   const parserPath = path.join(directory, 'python.so');
   try {
     execFileSync('script/tree-sitter', ['build', '-o', parserPath, '.'], { cwd: repositoryRoot });
-    for (const depth of [510, 511, 512, 600]) {
+    for (const [depth, brackets] of [
+      [510, 0],
+      [510, 127],
+      [511, 0],
+      [512, 0],
+      [600, 0],
+    ] as const) {
       const source =
         Array.from({ length: depth }, (_, index) => `${' '.repeat(index)}if 1:\n`).join('') +
-        `${' '.repeat(depth)}'a'\n`;
-      const sourcePath = path.join(directory, `deep-${depth}.py`);
+        `${' '.repeat(depth)}${'('.repeat(brackets)}'a'${')'.repeat(brackets)}\n`;
+      const sourcePath = path.join(directory, `deep-${depth}-${brackets}.py`);
       fs.writeFileSync(sourcePath, source);
       const result = spawnSync(
         'script/tree-sitter',

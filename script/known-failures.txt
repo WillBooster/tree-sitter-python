@@ -1,4 +1,3 @@
-examples/cpython/Lib/test/test_compile.py
 examples/cpython/Lib/test/test_patma.py
 examples/cpython/Lib/test/tokenizedata/badsyntax_3131.py
 examples/django/tests/test_runner_apps/tagged/tests_syntax_error.py

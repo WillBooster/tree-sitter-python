@@ -30,16 +30,20 @@ test('keeps dedented continuation operands and following statements in their sui
     '(call function: (identifier) @call)\n(binary_operator right: (integer) @operand)\n(pair value: (integer) @operand)'
   );
   try {
-    for (const expression of [
+    const cases: [string, string][] = [
       'call(1 +\n  2)',
       '(1 +\n  2)',
       'items[1 +\n  2]',
       '[1 +\n  2]',
       '{1 +\n  2}',
       '{1:\n  2}',
-      ...[126, 127].map((depth) => '('.repeat(depth) + '1 +\n  2' + ')'.repeat(depth)),
-    ]) {
-      let source = `if enabled:\n  result = ${expression}\n  still_inside()\nafter()\n`;
+      '('.repeat(129) + '1 +\n  2' + ')'.repeat(129),
+    ].map((expression) => ['  ', expression]);
+    for (const width of [252, 253, 768, 769]) {
+      cases.push([' '.repeat(width), 'call(1 +\n  2)']);
+    }
+    for (const [suiteIndent, expression] of cases) {
+      let source = `if enabled:\n${suiteIndent}result = ${expression}\n${suiteIndent}still_inside()\nafter()\n`;
       let tree = parser.parse(source)!;
       try {
         expect(tree.rootNode.hasError, source).toBe(false);
@@ -110,6 +114,64 @@ test('recovers unbracketed incomplete expressions without capturing the followin
       }
     }
   } finally {
+    parser.delete();
+  }
+});
+
+test('retains explicit line continuation nodes around brackets after edits', async () => {
+  await Parser.init();
+  const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
+  const parser = new Parser().setLanguage(language);
+  const query = new Query(language, '(line_continuation) @continuation');
+  try {
+    for (const expression of ['(1)', '[1]', '{1}', '{1: 2}']) {
+      for (const newline of ['\n', '\r\n']) {
+        const continuation = String.fromCodePoint(92) + newline;
+        const source = `x = ${continuation}${expression.slice(0, -1)} ${continuation}${expression.slice(-1)}${newline}`;
+        const tree = parser.parse(source)!;
+        try {
+          expect(tree.rootNode.hasError, source).toBe(false);
+          const captures = (root: typeof tree.rootNode): [string, number, number][] =>
+            query.captures(root).map(({ node }) => [node.text, node.startIndex, node.endIndex]);
+          const first = source.indexOf(continuation);
+          const second = source.lastIndexOf(continuation);
+          expect(captures(tree.rootNode)).toEqual([
+            [continuation, first, first + continuation.length],
+            [continuation, second, second + continuation.length],
+          ]);
+          const startIndex = source.indexOf('1');
+          tree.edit(
+            new Edit({
+              startIndex,
+              oldEndIndex: startIndex + 1,
+              newEndIndex: startIndex + 2,
+              startPosition: { row: 1, column: 1 },
+              oldEndPosition: { row: 1, column: 2 },
+              newEndPosition: { row: 1, column: 3 },
+            })
+          );
+          const updated = source.slice(0, startIndex) + '11' + source.slice(startIndex + 1);
+          const incremental = parser.parse(updated, tree)!;
+          const fresh = parser.parse(updated)!;
+          try {
+            expect(incremental.rootNode.hasError, updated).toBe(false);
+            expect(incremental.rootNode.toString()).toBe(fresh.rootNode.toString());
+            expect(captures(incremental.rootNode)).toEqual(captures(fresh.rootNode));
+            expect(captures(incremental.rootNode)).toEqual([
+              [continuation, first, first + continuation.length],
+              [continuation, second + 1, second + 1 + continuation.length],
+            ]);
+          } finally {
+            incremental.delete();
+            fresh.delete();
+          }
+        } finally {
+          tree.delete();
+        }
+      }
+    }
+  } finally {
+    query.delete();
     parser.delete();
   }
 });
