@@ -718,7 +718,7 @@ async def d(a:str="default", b=c) -> None:
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (identifier)
+        name: (identifier)
         type: (type
           (identifier))))
     body: (block
@@ -728,7 +728,7 @@ async def d(a:str="default", b=c) -> None:
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (identifier)
+        name: (identifier)
         type: (type
           (attribute
             object: (identifier)
@@ -740,7 +740,7 @@ async def d(a:str="default", b=c) -> None:
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (identifier)
+        name: (identifier)
         type: (type
           (generic_type
             (identifier)
@@ -770,7 +770,7 @@ async def d(a:str="default", b=c) -> None:
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (identifier)
+        name: (identifier)
         type: (type
           (identifier))))
     return_type: (type
@@ -844,7 +844,7 @@ def foo():
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (list_splat_pattern
+        name: (list_splat_pattern
           (identifier))
         type: (type
           (identifier))))
@@ -854,7 +854,7 @@ def foo():
     name: (identifier)
     parameters: (parameters
       (typed_parameter
-        (dictionary_splat_pattern
+        name: (dictionary_splat_pattern
           (identifier))
         type: (type
           (identifier))))
