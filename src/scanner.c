@@ -22,6 +22,7 @@ enum TokenType {
     OPEN_BRACE,
     CLOSE_BRACE,
     EXCEPT,
+    FORMAT_SPECIFIER_CONTENT,
 };
 
 typedef enum {
@@ -98,6 +99,7 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
+static bool scan_format_specifier(TSLexer *lexer);
 static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol);
 static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols);
 static unsigned serialize_indents(Scanner *scanner, char *buffer, size_t size);
@@ -107,7 +109,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     Scanner *scanner = (Scanner *)payload;
 
     bool error_recovery_mode = valid_symbols[STRING_CONTENT] && valid_symbols[INDENT];
-    bool within_brackets = scanner->bracket_depth > 0;
+
+    if (valid_symbols[FORMAT_SPECIFIER_CONTENT] && !error_recovery_mode && scan_format_specifier(lexer)) {
+        return true;
+    }
 
     bool advanced_once = false;
     if (valid_symbols[ESCAPE_INTERPOLATION] && scanner->delimiters.size > 0 &&
@@ -293,7 +298,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
 
             if ((valid_symbols[DEDENT] ||
                  (!valid_symbols[NEWLINE] && !(valid_symbols[STRING_START] && next_tok_is_string_start) &&
-                  !within_brackets)) &&
+                  scanner->bracket_depth == 0)) &&
                 indent_length < current_indent_length && !scanner->inside_interpolated_string &&
 
                 // Wait to create a dedent token until we've consumed any
@@ -380,6 +385,22 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     return false;
 }
 
+static bool scan_format_specifier(TSLexer *lexer) {
+    while (lexer->lookahead == '\n') {
+        skip(lexer);
+    }
+    bool has_content = false;
+    while (!lexer->eof(lexer) && lexer->lookahead != '{' && lexer->lookahead != '}' && lexer->lookahead != '\n') {
+        advance(lexer);
+        has_content = true;
+    }
+    if (has_content) {
+        lexer->mark_end(lexer);
+        lexer->result_symbol = FORMAT_SPECIFIER_CONTENT;
+    }
+    return has_content;
+}
+
 static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
     enum TokenType symbol;
     switch (lexer->lookahead) {
@@ -419,10 +440,7 @@ unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buff
         buffer[size++] = (char)(scanner->bracket_depth >> shift);
     }
 
-    size_t delimiter_count = scanner->delimiters.size;
-    if (delimiter_count > UINT8_MAX) {
-        delimiter_count = UINT8_MAX;
-    }
+    size_t delimiter_count = scanner->delimiters.size > UINT8_MAX ? UINT8_MAX : scanner->delimiters.size;
     buffer[size++] = (char)delimiter_count;
 
     if (delimiter_count > 0) {
