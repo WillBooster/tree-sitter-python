@@ -53,6 +53,7 @@ def test_incomplete_call():
     (parameters)
     (ERROR
       (identifier))
+    (ERROR)
     (comment)
     (block
       (function_definition
