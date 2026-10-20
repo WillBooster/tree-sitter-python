@@ -50,11 +50,6 @@
   (identifier) @constructor
   (tuple (identifier) @constructor)
   (parenthesized_expression (identifier) @constructor)
-  (as_pattern [
-    (identifier) @constructor
-    (tuple (identifier) @constructor)
-    (parenthesized_expression (identifier) @constructor)
-  ])
 ])
  (#match? @constructor "^[0-9_]*[A-Z][A-Z_0-9]*$"))
 

@@ -54,7 +54,6 @@ module.exports = grammar({
     [$.tuple, $.tuple_pattern],
     [$.list, $.list_pattern],
     [$.with_item, $.tuple],
-    [$.named_expression, $.as_pattern],
     [$.print_statement, $.primary_expression],
     [$.match_statement, $.primary_expression],
   ],
@@ -339,7 +338,10 @@ module.exports = grammar({
         optional(token(prec(1, '*'))),
         optional(
           choice(
-            seq(field('value', $.expression), optional(seq('as', field('alias', $.expression)))),
+            seq(
+              field('value', $.expression),
+              optional(seq('as', field('alias', choice($.identifier, $.keyword_identifier))))
+            ),
             commaSep1(field('value', $.expression))
           )
         ),
@@ -354,7 +356,7 @@ module.exports = grammar({
     with_clause: ($) =>
       choice(seq(commaSep1($.with_item), optional(',')), seq('(', commaSep1($.with_item), optional(','), ')')),
 
-    with_item: ($) => prec.dynamic(1, seq(field('value', $.expression))),
+    with_item: ($) => prec.dynamic(1, field('value', choice($.expression, $.as_pattern))),
 
     function_definition: ($) =>
       seq(
@@ -643,7 +645,7 @@ module.exports = grammar({
 
     _expression_within_for_in_clause: ($) => choice($.expression, alias($.lambda_within_for_in_clause, $.lambda)),
 
-    expression: ($) => choice($._expression_without_named_expression, $.named_expression, $.as_pattern),
+    expression: ($) => choice($._expression_without_named_expression, $.named_expression),
 
     _expression_without_named_expression: ($) =>
       choice(

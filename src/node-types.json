@@ -4,10 +4,6 @@
     "named": true,
     "subtypes": [
       {
-        "type": "as_pattern",
-        "named": true
-      },
-      {
         "type": "boolean_operator",
         "named": true
       },
@@ -306,10 +302,6 @@
       "multiple": false,
       "required": true,
       "types": [
-        {
-          "type": "as_pattern",
-          "named": true
-        },
         {
           "type": "boolean_operator",
           "named": true
@@ -1643,7 +1635,7 @@
         "required": false,
         "types": [
           {
-            "type": "expression",
+            "type": "identifier",
             "named": true
           }
         ]
@@ -3603,6 +3595,10 @@
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "as_pattern",
+            "named": true
+          },
           {
             "type": "expression",
             "named": true
