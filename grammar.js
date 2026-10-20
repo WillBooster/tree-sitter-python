@@ -847,8 +847,12 @@ module.exports = grammar({
       prec(
         PREC.typed_parameter,
         choice(
-          seq(choice($.identifier, $.dictionary_splat_pattern), ':', field('type', $.type)),
-          seq($.list_splat_pattern, ':', field('type', choice($.type, alias($._default_splat_type, $.splat_type))))
+          seq(field('name', choice($.identifier, $.dictionary_splat_pattern)), ':', field('type', $.type)),
+          seq(
+            field('name', $.list_splat_pattern),
+            ':',
+            field('type', choice($.type, alias($._default_splat_type, $.splat_type)))
+          )
         )
       ),
 
