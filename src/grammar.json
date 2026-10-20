@@ -1423,8 +1423,17 @@
                               "type": "FIELD",
                               "name": "alias",
                               "content": {
-                                "type": "SYMBOL",
-                                "name": "expression"
+                                "type": "CHOICE",
+                                "members": [
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "identifier"
+                                  },
+                                  {
+                                    "type": "SYMBOL",
+                                    "name": "keyword_identifier"
+                                  }
+                                ]
                               }
                             }
                           ]
@@ -1641,17 +1650,21 @@
       "type": "PREC_DYNAMIC",
       "value": 1,
       "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "FIELD",
-            "name": "value",
-            "content": {
+        "type": "FIELD",
+        "name": "value",
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
               "type": "SYMBOL",
               "name": "expression"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "as_pattern"
             }
-          }
-        ]
+          ]
+        }
       }
     },
     "function_definition": {
@@ -4206,10 +4219,6 @@
         {
           "type": "SYMBOL",
           "name": "named_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "as_pattern"
         }
       ]
     },
@@ -7182,10 +7191,6 @@
     [
       "with_item",
       "tuple"
-    ],
-    [
-      "named_expression",
-      "as_pattern"
     ],
     [
       "print_statement",
