@@ -730,9 +730,9 @@ async def d(a:str="default", b=c) -> None:
       (typed_parameter
         name: (identifier)
         type: (type
-          (attribute
-            object: (identifier)
-            attribute: (identifier)))))
+          (member_type
+            (identifier)
+            (identifier)))))
     body: (block
       (expression_statement
         (identifier))))
@@ -1548,8 +1548,10 @@ type IntOrStrSequence[T: (int, str)] = Sequence[T]  # TypeVar with constraints
                 (identifier))
               (type
                 (tuple
-                  (identifier)
-                  (identifier))))))))
+                  (type
+                    (identifier))
+                  (type
+                    (identifier)))))))))
     (type
       (generic_type
         (identifier)
@@ -1791,7 +1793,7 @@ def callable_default[T = lambda x: x](): pass
         (list_splat_pattern
           (identifier))
         (type
-          (attribute
+          (member_type
             (identifier)
             (identifier)))))
     (type
