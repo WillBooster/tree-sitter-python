@@ -2271,3 +2271,35 @@ class lazy:
           (identifier)
           (type
             (identifier)))))))
+
+================================================================================
+Dedented continuation retains suite ownership
+================================================================================
+
+if True:
+  print(1 +
+1)
+  inside()
+outside()
+
+--------------------------------------------------------------------------------
+
+(module
+  (if_statement
+    (true)
+    (block
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list
+            (binary_operator
+              (integer)
+              (integer)))))
+      (expression_statement
+        (call
+          (identifier)
+          (argument_list)))))
+  (expression_statement
+    (call
+      (identifier)
+      (argument_list))))

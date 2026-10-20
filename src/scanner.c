@@ -15,8 +15,11 @@ enum TokenType {
     ESCAPE_INTERPOLATION,
     STRING_END,
     COMMENT,
+    OPEN_PAREN,
     CLOSE_PAREN,
+    OPEN_BRACKET,
     CLOSE_BRACKET,
+    OPEN_BRACE,
     CLOSE_BRACE,
     EXCEPT,
 };
@@ -82,21 +85,27 @@ static inline void set_end_character(Delimiter *delimiter, int32_t character) {
     }
 }
 
+enum { EXTENDED_BRACKET_DEPTH = UINT8_MAX >> 1 };
+
 typedef struct {
     Array(uint16_t) indents;
     Array(Delimiter) delimiters;
     bool inside_interpolated_string;
+    uint32_t bracket_depth;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
+static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol);
+static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols);
+
 bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
 
     bool error_recovery_mode = valid_symbols[STRING_CONTENT] && valid_symbols[INDENT];
-    bool within_brackets = valid_symbols[CLOSE_BRACE] || valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACKET];
+    bool within_brackets = scanner->bracket_depth > 0;
 
     bool advanced_once = false;
     if (valid_symbols[ESCAPE_INTERPOLATION] && scanner->delimiters.size > 0 &&
@@ -113,6 +122,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 lexer->result_symbol = ESCAPE_INTERPOLATION;
                 return true;
             }
+            enum TokenType symbol = is_left_brace ? OPEN_BRACE : CLOSE_BRACE;
+            if (valid_symbols[symbol]) {
+                return emit_bracket(scanner, lexer, symbol);
+            }
             return false;
         }
     }
@@ -121,21 +134,20 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         Delimiter *delimiter = array_back(&scanner->delimiters);
         int32_t end_char = end_character(delimiter);
         bool has_content = advanced_once;
+        bool consumed_raw_escape = false;
         while (lexer->lookahead) {
             if ((advanced_once || lexer->lookahead == '{' || lexer->lookahead == '}') && is_format(delimiter)) {
                 lexer->mark_end(lexer);
                 lexer->result_symbol = STRING_CONTENT;
-                return has_content;
+                return has_content || (!consumed_raw_escape && scan_bracket(scanner, lexer, valid_symbols));
             }
             if (lexer->lookahead == '\\') {
                 if (is_raw(delimiter)) {
-                    // Step over the backslash.
+                    consumed_raw_escape = true;
                     advance(lexer);
-                    // Step over any escaped quotes.
                     if (lexer->lookahead == end_character(delimiter) || lexer->lookahead == '\\') {
                         advance(lexer);
                     }
-                    // Step over newlines
                     if (lexer->lookahead == '\r') {
                         advance(lexer);
                         if (lexer->lookahead == '\n') {
@@ -287,6 +299,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 // whose indentation matches the current block.
                 first_comment_indent_length < (int32_t)current_indent_length) {
                 array_pop(&scanner->indents);
+                scanner->bracket_depth = 0;
                 lexer->result_symbol = DEDENT;
                 return true;
             }
@@ -296,6 +309,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             lexer->result_symbol = NEWLINE;
             return true;
         }
+    }
+
+    if (scan_bracket(scanner, lexer, valid_symbols)) {
+        return true;
     }
 
     if (first_comment_indent_length == -1 && valid_symbols[STRING_START]) {
@@ -361,12 +378,47 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     return false;
 }
 
+static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+    enum TokenType symbol;
+    switch (lexer->lookahead) {
+        case '(': symbol = OPEN_PAREN; break;
+        case ')': symbol = CLOSE_PAREN; break;
+        case '[': symbol = OPEN_BRACKET; break;
+        case ']': symbol = CLOSE_BRACKET; break;
+        case '{': symbol = OPEN_BRACE; break;
+        case '}': symbol = CLOSE_BRACE; break;
+        default: return false;
+    }
+    if (!valid_symbols[symbol]) {
+        return false;
+    }
+    advance(lexer);
+    return emit_bracket(scanner, lexer, symbol);
+}
+
+static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol) {
+    if (symbol == OPEN_PAREN || symbol == OPEN_BRACKET || symbol == OPEN_BRACE) {
+        scanner->bracket_depth++;
+    } else if (scanner->bracket_depth > 0) {
+        scanner->bracket_depth--;
+    }
+    lexer->mark_end(lexer);
+    lexer->result_symbol = symbol;
+    return true;
+}
+
 unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buffer) {
     Scanner *scanner = (Scanner *)payload;
 
     size_t size = 0;
 
-    buffer[size++] = (char)scanner->inside_interpolated_string;
+    uint32_t inline_depth = scanner->bracket_depth < EXTENDED_BRACKET_DEPTH ? scanner->bracket_depth : EXTENDED_BRACKET_DEPTH;
+    buffer[size++] = (char)((inline_depth << 1) | scanner->inside_interpolated_string);
+    if (inline_depth == EXTENDED_BRACKET_DEPTH) {
+        for (uint32_t shift = 0; shift < 32; shift += 8) {
+            buffer[size++] = (char)(scanner->bracket_depth >> shift);
+        }
+    }
 
     size_t delimiter_count = scanner->delimiters.size;
     if (delimiter_count > UINT8_MAX) {
@@ -395,11 +447,20 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
     array_delete(&scanner->delimiters);
     array_delete(&scanner->indents);
     array_push(&scanner->indents, 0);
+    scanner->bracket_depth = 0;
 
     if (length > 0) {
         size_t size = 0;
 
-        scanner->inside_interpolated_string = (bool)buffer[size++];
+        uint8_t flags = (uint8_t)buffer[size++];
+        scanner->inside_interpolated_string = flags & 1;
+        scanner->bracket_depth = flags >> 1;
+        if (scanner->bracket_depth == EXTENDED_BRACKET_DEPTH) {
+            scanner->bracket_depth = 0;
+            for (uint32_t shift = 0; shift < 32; shift += 8) {
+                scanner->bracket_depth |= (uint32_t)(uint8_t)buffer[size++] << shift;
+            }
+        }
 
         size_t delimiter_count = (uint8_t)buffer[size++];
         if (delimiter_count > 0) {
