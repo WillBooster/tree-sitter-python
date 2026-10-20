@@ -15,10 +15,14 @@ enum TokenType {
     ESCAPE_INTERPOLATION,
     STRING_END,
     COMMENT,
+    OPEN_PAREN,
     CLOSE_PAREN,
+    OPEN_BRACKET,
     CLOSE_BRACKET,
+    OPEN_BRACE,
     CLOSE_BRACE,
     EXCEPT,
+    FORMAT_SPECIFIER_CONTENT,
 };
 
 typedef enum {
@@ -82,21 +86,33 @@ static inline void set_end_character(Delimiter *delimiter, int32_t character) {
     }
 }
 
+enum { INDENT_DELTA_PREFIX = UINT8_MAX - 3, LARGE_INDENT_DELTA = 3 << 8 };
+
 typedef struct {
     Array(uint16_t) indents;
     Array(Delimiter) delimiters;
     bool inside_interpolated_string;
+    uint32_t bracket_depth;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
+static bool scan_format_specifier(TSLexer *lexer);
+static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol);
+static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols);
+static unsigned serialize_indents(Scanner *scanner, char *buffer, size_t size);
+static void deserialize_indents(Scanner *scanner, const char *buffer, unsigned length, size_t size);
+
 bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
     Scanner *scanner = (Scanner *)payload;
 
     bool error_recovery_mode = valid_symbols[STRING_CONTENT] && valid_symbols[INDENT];
-    bool within_brackets = valid_symbols[CLOSE_BRACE] || valid_symbols[CLOSE_PAREN] || valid_symbols[CLOSE_BRACKET];
+
+    if (valid_symbols[FORMAT_SPECIFIER_CONTENT] && !error_recovery_mode && scan_format_specifier(lexer)) {
+        return true;
+    }
 
     bool advanced_once = false;
     if (valid_symbols[ESCAPE_INTERPOLATION] && scanner->delimiters.size > 0 &&
@@ -112,6 +128,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 lexer->mark_end(lexer);
                 lexer->result_symbol = ESCAPE_INTERPOLATION;
                 return true;
+            }
+            enum TokenType symbol = is_left_brace ? OPEN_BRACE : CLOSE_BRACE;
+            if (valid_symbols[symbol]) {
+                return emit_bracket(scanner, lexer, symbol);
             }
             return false;
         }
@@ -129,13 +149,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             }
             if (lexer->lookahead == '\\') {
                 if (is_raw(delimiter)) {
-                    // Step over the backslash.
                     advance(lexer);
-                    // Step over any escaped quotes.
                     if (lexer->lookahead == end_character(delimiter) || lexer->lookahead == '\\') {
                         advance(lexer);
                     }
-                    // Step over newlines
                     if (lexer->lookahead == '\r') {
                         advance(lexer);
                         if (lexer->lookahead == '\n') {
@@ -211,6 +228,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     lexer->mark_end(lexer);
 
     bool found_end_of_line = false;
+    bool found_line_continuation = false;
     uint16_t indent_length = 0;
     int32_t first_comment_indent_length = -1;
     for (;;) {
@@ -246,6 +264,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             skip(lexer);
             indent_length = 0;
         } else if (lexer->lookahead == '\\') {
+            found_line_continuation = true;
             skip(lexer);
             if (lexer->lookahead == '\r') {
                 skip(lexer);
@@ -279,7 +298,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
 
             if ((valid_symbols[DEDENT] ||
                  (!valid_symbols[NEWLINE] && !(valid_symbols[STRING_START] && next_tok_is_string_start) &&
-                  !within_brackets)) &&
+                  scanner->bracket_depth == 0)) &&
                 indent_length < current_indent_length && !scanner->inside_interpolated_string &&
 
                 // Wait to create a dedent token until we've consumed any
@@ -287,6 +306,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 // whose indentation matches the current block.
                 first_comment_indent_length < (int32_t)current_indent_length) {
                 array_pop(&scanner->indents);
+                scanner->bracket_depth = 0;
                 lexer->result_symbol = DEDENT;
                 return true;
             }
@@ -296,6 +316,10 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             lexer->result_symbol = NEWLINE;
             return true;
         }
+    }
+
+    if (!found_line_continuation && scan_bracket(scanner, lexer, valid_symbols)) {
+        return true;
     }
 
     if (first_comment_indent_length == -1 && valid_symbols[STRING_START]) {
@@ -361,17 +385,62 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     return false;
 }
 
+static bool scan_format_specifier(TSLexer *lexer) {
+    while (lexer->lookahead == '\n') {
+        skip(lexer);
+    }
+    bool has_content = false;
+    while (!lexer->eof(lexer) && lexer->lookahead != '{' && lexer->lookahead != '}' && lexer->lookahead != '\n') {
+        advance(lexer);
+        has_content = true;
+    }
+    if (has_content) {
+        lexer->mark_end(lexer);
+        lexer->result_symbol = FORMAT_SPECIFIER_CONTENT;
+    }
+    return has_content;
+}
+
+static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
+    enum TokenType symbol;
+    switch (lexer->lookahead) {
+        case '(': symbol = OPEN_PAREN; break;
+        case ')': symbol = CLOSE_PAREN; break;
+        case '[': symbol = OPEN_BRACKET; break;
+        case ']': symbol = CLOSE_BRACKET; break;
+        case '{': symbol = OPEN_BRACE; break;
+        case '}': symbol = CLOSE_BRACE; break;
+        default: return false;
+    }
+    if (!valid_symbols[symbol]) {
+        return false;
+    }
+    advance(lexer);
+    return emit_bracket(scanner, lexer, symbol);
+}
+
+static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol) {
+    if (symbol == OPEN_PAREN || symbol == OPEN_BRACKET || symbol == OPEN_BRACE) {
+        scanner->bracket_depth++;
+    } else if (scanner->bracket_depth > 0) {
+        scanner->bracket_depth--;
+    }
+    lexer->mark_end(lexer);
+    lexer->result_symbol = symbol;
+    return true;
+}
+
 unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buffer) {
     Scanner *scanner = (Scanner *)payload;
 
     size_t size = 0;
 
     buffer[size++] = (char)scanner->inside_interpolated_string;
-
-    size_t delimiter_count = scanner->delimiters.size;
-    if (delimiter_count > UINT8_MAX) {
-        delimiter_count = UINT8_MAX;
+    for (uint32_t shift = 0; shift < 32; shift += 8) {
+        buffer[size++] = (char)(scanner->bracket_depth >> shift);
     }
+
+    size_t delimiter_count = scanner->delimiters.size > UINT8_MAX ? UINT8_MAX : scanner->delimiters.size;
     buffer[size++] = (char)delimiter_count;
 
     if (delimiter_count > 0) {
@@ -379,13 +448,29 @@ unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buff
     }
     size += delimiter_count;
 
-    uint32_t iter = 1;
-    for (; iter < scanner->indents.size && size + 2 <= TREE_SITTER_SERIALIZATION_BUFFER_SIZE; ++iter) {
-        uint16_t indent_value = *array_get(&scanner->indents, iter);
-        buffer[size++] = (char)(indent_value & 0xFF);
-        buffer[size++] = (char)((indent_value >> 8) & 0xFF);
-    }
+    return serialize_indents(scanner, buffer, size);
+}
 
+static unsigned serialize_indents(Scanner *scanner, char *buffer, size_t size) {
+    uint16_t previous = 0;
+    for (uint32_t index = 1; index < scanner->indents.size; index++) {
+        uint16_t indent = *array_get(&scanner->indents, index);
+        uint32_t value = indent - previous - 1;
+        size_t bytes = value < INDENT_DELTA_PREFIX ? 1 : value < LARGE_INDENT_DELTA ? 2 : 3;
+        if (size + bytes > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
+            break;
+        }
+        previous = indent;
+        if (bytes == 1) {
+            buffer[size++] = (char)value;
+            continue;
+        }
+        buffer[size++] = bytes == 2 ? (char)(INDENT_DELTA_PREFIX + (value >> 8)) : (char)UINT8_MAX;
+        buffer[size++] = (char)value;
+        if (bytes == 3) {
+            buffer[size++] = (char)(value >> 8);
+        }
+    }
     return size;
 }
 
@@ -395,11 +480,15 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
     array_delete(&scanner->delimiters);
     array_delete(&scanner->indents);
     array_push(&scanner->indents, 0);
+    scanner->bracket_depth = 0;
 
     if (length > 0) {
         size_t size = 0;
 
         scanner->inside_interpolated_string = (bool)buffer[size++];
+        for (uint32_t shift = 0; shift < 32; shift += 8) {
+            scanner->bracket_depth |= (uint32_t)(uint8_t)buffer[size++] << shift;
+        }
 
         size_t delimiter_count = (uint8_t)buffer[size++];
         if (delimiter_count > 0) {
@@ -409,10 +498,28 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
             size += delimiter_count;
         }
 
-        for (; size + 1 < length; size += 2) {
-            uint16_t indent_value = (unsigned char)buffer[size] | ((unsigned char)buffer[size + 1] << 8);
-            array_push(&scanner->indents, indent_value);
+        deserialize_indents(scanner, buffer, length, size);
+    }
+}
+
+static void deserialize_indents(Scanner *scanner, const char *buffer, unsigned length, size_t size) {
+    uint32_t indent = 0;
+    while (size < length) {
+        uint8_t prefix = (uint8_t)buffer[size++];
+        uint32_t value = prefix;
+        if (prefix >= INDENT_DELTA_PREFIX) {
+            if (size + (prefix == UINT8_MAX ? 2 : 1) > length) {
+                break;
+            }
+            value = (uint8_t)buffer[size++];
+            uint32_t high = prefix == UINT8_MAX ? (uint8_t)buffer[size++] : prefix - INDENT_DELTA_PREFIX;
+            value |= high << 8;
         }
+        indent += value + 1;
+        if (indent > UINT16_MAX) {
+            break;
+        }
+        array_push(&scanner->indents, (uint16_t)indent);
     }
 }
 

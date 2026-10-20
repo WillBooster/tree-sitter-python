@@ -90,12 +90,14 @@ module.exports = grammar({
     // if no dedent is expected.
     sym('comment'),
 
-    // Allow the external scanner to check for the validity of closing brackets
-    // so that it can avoid returning dedent tokens between brackets.
-    ']',
+    '(',
     ')',
+    '[',
+    ']',
+    '{',
     '}',
     'except',
+    sym('_format_specifier_content'),
   ],
 
   inline: ($) => [
@@ -977,7 +979,7 @@ module.exports = grammar({
     format_specifier: ($) =>
       seq(
         token(prec(1, ':')),
-        repeat(choice(token(prec(1, /[^{}\n]+/)), alias($.interpolation, sym('format_expression'))))
+        repeat(choice(sym('_format_specifier_content'), alias($.interpolation, sym('format_expression'))))
       ),
 
     type_conversion: () => /![a-z]/,
