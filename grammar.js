@@ -52,6 +52,7 @@ module.exports = grammar({
     [$.primary_expression, $._default_member_type],
     [$.list, $._default_type_list],
     [$._type_parameter_expression, $.expression],
+    [$.list_splat, $._type_parameter_expression],
     [$.primary_expression, $.pattern],
     [$.primary_expression, $.list_splat_pattern],
     [$.tuple, $.tuple_pattern],
@@ -59,6 +60,7 @@ module.exports = grammar({
     [$.with_item, $.tuple],
     [$.named_expression, $.as_pattern],
     [$.print_statement, $.primary_expression],
+    [$.print_statement, $.primary_expression, $.generic_type],
     [$.match_statement, $.primary_expression],
     [$.primary_expression, $.generic_type],
   ],
@@ -429,7 +431,11 @@ module.exports = grammar({
       ),
 
     _type_parameter_name: ($) =>
-      choice($.identifier, alias(choice('type', 'match', 'print', 'exec', 'lazy'), $.identifier)),
+      choice(
+        $.identifier,
+        alias(choice('type', 'match', 'lazy'), $.identifier),
+        prec(-3, alias(choice('print', 'exec'), $.identifier))
+      ),
 
     _default_member_base: ($) => choice($._type_parameter_name, alias($._default_member_type, $.member_type)),
 
@@ -849,13 +855,7 @@ module.exports = grammar({
     type: ($) => choice(prec(1, $.expression), $.generic_type, $.union_type, $.constrained_type, $.member_type),
     splat_type: ($) => prec(1, seq(choice('*', '**'), $.identifier)),
     generic_type: ($) =>
-      prec.dynamic(
-        1,
-        seq(
-          choice($.identifier, alias('type', $.identifier), alias($._default_member_type, $.member_type)),
-          alias($._generic_type_arguments, $.type_parameter)
-        )
-      ),
+      prec.dynamic(1, seq($._default_member_base, alias($._generic_type_arguments, $.type_parameter))),
     union_type: ($) => prec.left(seq($.type, '|', $.type)),
     constrained_type: ($) => prec.right(seq($.type, ':', $.type)),
     member_type: ($) => seq($.type, '.', $.identifier),
