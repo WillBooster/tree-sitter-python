@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { Edit, Language, Parser } from '@willbooster/web-tree-sitter';
+import { Edit, Language, Parser, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 test('incrementally distinguishes format alignment from a parenthesized assignment', async () => {
@@ -50,6 +50,63 @@ test('incrementally distinguishes format alignment from a parenthesized assignme
     expect(tree.rootNode.descendantsOfType('named_expression')).toHaveLength(0);
   } finally {
     tree.delete();
+    parser.delete();
+  }
+});
+
+test('preserves format-specifier whitespace and ranges after edits', async () => {
+  await Parser.init();
+  const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
+  const parser = new Parser().setLanguage(language);
+  const query = new Query(language, '(format_specifier) @format');
+  try {
+    for (const payload of [' ', '   ', '\t', ' {2}', '{2} ', '\r\n', '\n ', '\r\n\t']) {
+      const source = `x = f"""{1:${payload}}"""\n`;
+      const tree = parser.parse(source)!;
+      try {
+        expect(tree.rootNode.hasError, source).toBe(false);
+        const captures = (root: typeof tree.rootNode): [string, number, number][] =>
+          query.captures(root).map(({ node }) => [node.text, node.startIndex, node.endIndex]);
+        const endIndex = source.lastIndexOf('}');
+        const expected = source.slice(source.indexOf(':'), endIndex).replace(/\n$/, '');
+        expect(captures(tree.rootNode)).toEqual([
+          [expected, source.indexOf(':'), source.indexOf(':') + expected.length],
+        ]);
+        const startIndex = source.indexOf(':') + 1;
+        tree.edit(
+          new Edit({
+            startIndex,
+            oldEndIndex: startIndex,
+            newEndIndex: startIndex + 1,
+            startPosition: { row: 0, column: startIndex },
+            oldEndPosition: { row: 0, column: startIndex },
+            newEndPosition: { row: 0, column: startIndex + 1 },
+          })
+        );
+        const updated = source.slice(0, startIndex) + ' ' + source.slice(startIndex);
+        const incremental = parser.parse(updated, tree)!;
+        const fresh = parser.parse(updated)!;
+        try {
+          expect(incremental.rootNode.hasError, updated).toBe(false);
+          expect(incremental.rootNode.toString()).toBe(fresh.rootNode.toString());
+          expect(captures(incremental.rootNode)).toEqual(captures(fresh.rootNode));
+          expect(captures(incremental.rootNode)).toEqual([
+            [
+              expected.slice(0, 1) + ' ' + expected.slice(1),
+              source.indexOf(':'),
+              source.indexOf(':') + expected.length + 1,
+            ],
+          ]);
+        } finally {
+          incremental.delete();
+          fresh.delete();
+        }
+      } finally {
+        tree.delete();
+      }
+    }
+  } finally {
+    query.delete();
     parser.delete();
   }
 });

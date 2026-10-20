@@ -6622,15 +6622,8 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "TOKEN",
-                "content": {
-                  "type": "PREC",
-                  "value": 1,
-                  "content": {
-                    "type": "PATTERN",
-                    "value": "[^{}\\n]+"
-                  }
-                }
+                "type": "SYMBOL",
+                "name": "_format_specifier_content"
               },
               {
                 "type": "ALIAS",
@@ -7239,11 +7232,23 @@
     },
     {
       "type": "STRING",
-      "value": "]"
+      "value": "("
     },
     {
       "type": "STRING",
       "value": ")"
+    },
+    {
+      "type": "STRING",
+      "value": "["
+    },
+    {
+      "type": "STRING",
+      "value": "]"
+    },
+    {
+      "type": "STRING",
+      "value": "{"
     },
     {
       "type": "STRING",
@@ -7252,6 +7257,10 @@
     {
       "type": "STRING",
       "value": "except"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_format_specifier_content"
     }
   ],
   "inline": [
