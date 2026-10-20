@@ -1,5 +1,6 @@
+import fs from 'node:fs';
 import path from 'node:path';
-import { Language, Parser } from '@willbooster/web-tree-sitter';
+import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 await Parser.init();
@@ -64,6 +65,54 @@ test('keeps union operators as value expressions outside annotation positions', 
       }
     }
   } finally {
+    parser.delete();
+  }
+});
+
+test('keeps generic receivers and repeated subscripts as types through member and union boundaries', () => {
+  const parser = new Parser().setLanguage(language);
+  const query = new Query(
+    language,
+    fs.readFileSync(path.join(import.meta.dirname, '../../queries/highlights.scm'), 'utf8')
+  );
+  try {
+    for (const annotation of [
+      'Outer[int].Inner',
+      'Outer[int].Inner[str].Leaf',
+      'a | b[c].d',
+      'b[c].d | a',
+      'a[b][c] | d',
+      'd | a[b][c]',
+    ]) {
+      const tree = parser.parse(`value: ${annotation} = None\nafter = 1\n`)!;
+      try {
+        expect(tree.rootNode.hasError, annotation).toBe(false);
+        expect(tree.rootNode.descendantsOfType('attribute'), annotation).toHaveLength(0);
+        expect(tree.rootNode.descendantsOfType('subscript'), annotation).toHaveLength(0);
+        expect(tree.rootNode.descendantsOfType('binary_operator'), annotation).toHaveLength(0);
+        expect(tree.rootNode.descendantsOfType('union_type'), annotation).toHaveLength(
+          annotation.split(' | ').length - 1
+        );
+        const captured = query
+          .captures(tree.rootNode)
+          .filter(({ name }) => name === 'type')
+          .map(({ node }) => node.text);
+        expect(captured, annotation).toEqual(expect.arrayContaining(annotation.match(/\w+/g)!));
+        expect(tree.rootNode.lastNamedChild?.text).toBe('after = 1');
+      } finally {
+        tree.delete();
+      }
+      const valueTree = parser.parse(`result = ${annotation}`)!;
+      try {
+        expect(valueTree.rootNode.hasError).toBe(false);
+        expect(valueTree.rootNode.descendantsOfType(['generic_type', 'member_type', 'union_type'])).toHaveLength(0);
+        expect(query.captures(valueTree.rootNode).filter(({ name }) => name === 'type')).toHaveLength(0);
+      } finally {
+        valueTree.delete();
+      }
+    }
+  } finally {
+    query.delete();
     parser.delete();
   }
 });

@@ -438,7 +438,12 @@ module.exports = grammar({
         prec(-3, alias(choice('print', 'exec'), $.identifier))
       ),
 
-    _default_member_base: ($) => choice($._type_parameter_name, alias($._default_member_type, sym('member_type'))),
+    _default_member_base: ($) =>
+      choice(
+        $._type_parameter_name,
+        alias($._default_member_type, sym('member_type')),
+        alias($._default_generic_type, sym('generic_type'))
+      ),
 
     _type_parameter_expression: ($) => choice($._expression_without_named_expression, prec.dynamic(1, $._default_type)),
 
