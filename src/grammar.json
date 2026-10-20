@@ -4977,8 +4977,12 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "primary_expression"
+            "type": "FIELD",
+            "name": "operands",
+            "content": {
+              "type": "SYMBOL",
+              "name": "primary_expression"
+            }
           },
           {
             "type": "REPEAT1",
@@ -5049,8 +5053,12 @@
                   }
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "primary_expression"
+                  "type": "FIELD",
+                  "name": "operands",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "primary_expression"
+                  }
                 }
               ]
             }

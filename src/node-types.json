@@ -1081,6 +1081,16 @@
     "type": "comparison_operator",
     "named": true,
     "fields": {
+      "operands": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "primary_expression",
+            "named": true
+          }
+        ]
+      },
       "operators": {
         "multiple": true,
         "required": true,
@@ -1131,16 +1141,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "primary_expression",
-          "named": true
-        }
-      ]
     }
   },
   {
