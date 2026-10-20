@@ -270,17 +270,21 @@
     "fields": {
       "alias": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "as_pattern_target",
+            "named": true
+          },
+          {
+            "type": "identifier",
             "named": true
           }
         ]
       }
     },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -289,10 +293,6 @@
         },
         {
           "type": "expression",
-          "named": true
-        },
-        {
-          "type": "identifier",
           "named": true
         }
       ]
