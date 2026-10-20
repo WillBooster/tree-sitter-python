@@ -2031,6 +2031,10 @@
       "required": true,
       "types": [
         {
+          "type": "generic_type",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
@@ -2576,15 +2580,15 @@
       "required": true,
       "types": [
         {
+          "type": "generic_type",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
           "type": "member_type",
-          "named": true
-        },
-        {
-          "type": "type",
           "named": true
         }
       ]
@@ -3242,11 +3246,19 @@
       "required": true,
       "types": [
         {
-          "type": "constrained_type",
+          "type": "boolean_operator",
           "named": true
         },
         {
-          "type": "expression",
+          "type": "comparison_operator",
+          "named": true
+        },
+        {
+          "type": "conditional_expression",
+          "named": true
+        },
+        {
+          "type": "constrained_type",
           "named": true
         },
         {
@@ -3254,7 +3266,19 @@
           "named": true
         },
         {
+          "type": "lambda",
+          "named": true
+        },
+        {
           "type": "member_type",
+          "named": true
+        },
+        {
+          "type": "not_operator",
+          "named": true
+        },
+        {
+          "type": "primary_expression",
           "named": true
         },
         {

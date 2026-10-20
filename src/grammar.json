@@ -2079,6 +2079,15 @@
                   "name": "type"
                 },
                 {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_constrained_type_expression"
+                  },
+                  "named": true,
+                  "value": "type"
+                },
+                {
                   "type": "SYMBOL",
                   "name": "splat_type"
                 },
@@ -2103,6 +2112,15 @@
                       {
                         "type": "SYMBOL",
                         "name": "type"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_constrained_type_expression"
+                        },
+                        "named": true,
+                        "value": "type"
                       },
                       {
                         "type": "SYMBOL",
@@ -2345,6 +2363,15 @@
           },
           "named": true,
           "value": "member_type"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_default_generic_type"
+          },
+          "named": true,
+          "value": "generic_type"
         }
       ]
     },
@@ -2560,6 +2587,15 @@
                   "value": "type"
                 },
                 {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_constrained_type_expression"
+                  },
+                  "named": true,
+                  "value": "type"
+                },
+                {
                   "type": "SYMBOL",
                   "name": "named_expression"
                 },
@@ -2595,6 +2631,15 @@
                         "content": {
                           "type": "SYMBOL",
                           "name": "_type_parameter_expression"
+                        },
+                        "named": true,
+                        "value": "type"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "_constrained_type_expression"
                         },
                         "named": true,
                         "value": "type"
@@ -2854,102 +2899,6 @@
               }
             }
           ]
-        }
-      ]
-    },
-    "_generic_type_arguments": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "["
-        },
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "type"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_type_parameter_expression"
-                  },
-                  "named": true,
-                  "value": "type"
-                },
-                {
-                  "type": "ALIAS",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "_default_splat_argument"
-                  },
-                  "named": true,
-                  "value": "splat_type"
-                }
-              ]
-            },
-            {
-              "type": "REPEAT",
-              "content": {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": ","
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "type"
-                      },
-                      {
-                        "type": "ALIAS",
-                        "content": {
-                          "type": "SYMBOL",
-                          "name": "_type_parameter_expression"
-                        },
-                        "named": true,
-                        "value": "type"
-                      },
-                      {
-                        "type": "ALIAS",
-                        "content": {
-                          "type": "SYMBOL",
-                          "name": "_default_splat_argument"
-                        },
-                        "named": true,
-                        "value": "splat_type"
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": ","
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
-          "type": "STRING",
-          "value": "]"
         }
       ]
     },
@@ -5775,33 +5724,8 @@
       }
     },
     "type": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "PREC",
-          "value": 1,
-          "content": {
-            "type": "SYMBOL",
-            "name": "expression"
-          }
-        },
-        {
-          "type": "SYMBOL",
-          "name": "generic_type"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "union_type"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "constrained_type"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "member_type"
-        }
-      ]
+      "type": "SYMBOL",
+      "name": "_type_parameter_expression"
     },
     "splat_type": {
       "type": "PREC",
@@ -5829,48 +5753,9 @@
         ]
       }
     },
-    "generic_type": {
-      "type": "PREC_DYNAMIC",
-      "value": 1,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "_default_member_base"
-          },
-          {
-            "type": "ALIAS",
-            "content": {
-              "type": "SYMBOL",
-              "name": "_generic_type_arguments"
-            },
-            "named": true,
-            "value": "type_parameter"
-          }
-        ]
-      }
-    },
-    "union_type": {
-      "type": "PREC_LEFT",
-      "value": 0,
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "SYMBOL",
-            "name": "type"
-          },
-          {
-            "type": "STRING",
-            "value": "|"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "type"
-          }
-        ]
-      }
+    "_constrained_type_expression": {
+      "type": "SYMBOL",
+      "name": "constrained_type"
     },
     "constrained_type": {
       "type": "PREC_RIGHT",
@@ -5892,23 +5777,6 @@
           }
         ]
       }
-    },
-    "member_type": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "type"
-        },
-        {
-          "type": "STRING",
-          "value": "."
-        },
-        {
-          "type": "SYMBOL",
-          "name": "identifier"
-        }
-      ]
     },
     "keyword_argument": {
       "type": "SEQ",
@@ -7272,6 +7140,7 @@
   "conflicts": [
     [
       "default_type_parameter",
+      "_default_type_primary",
       "primary_expression"
     ],
     [
@@ -7281,19 +7150,6 @@
     [
       "primary_expression",
       "_default_generic_type"
-    ],
-    [
-      "_default_generic_type",
-      "primary_expression",
-      "generic_type"
-    ],
-    [
-      "_default_type_arguments",
-      "expression"
-    ],
-    [
-      "_default_type_arguments",
-      "_generic_type_arguments"
     ],
     [
       "primary_expression",
@@ -7306,10 +7162,6 @@
     [
       "_type_parameter_expression",
       "expression"
-    ],
-    [
-      "list_splat",
-      "_type_parameter_expression"
     ],
     [
       "primary_expression",
@@ -7340,17 +7192,8 @@
       "primary_expression"
     ],
     [
-      "print_statement",
-      "primary_expression",
-      "generic_type"
-    ],
-    [
       "match_statement",
       "primary_expression"
-    ],
-    [
-      "primary_expression",
-      "generic_type"
     ]
   ],
   "precedences": [],
