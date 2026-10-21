@@ -71,7 +71,7 @@ fuzzed with. The parser requires runtime 10.x:
 
 ```toml
 [dependencies]
-tree-sitter = { package = "willbooster-tree-sitter", version = "7" }
+tree-sitter = { package = "willbooster-tree-sitter", version = "10.0.0" }
 tree-sitter-python = { package = "willbooster-tree-sitter-python", version = "9" }
 ```
 
