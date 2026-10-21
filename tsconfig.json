@@ -15,5 +15,5 @@
   },
   "exclude": ["test/fixtures"],
   "extends": "@tsconfig/bun/tsconfig.json",
-  "include": ["grammar.js", "*.config.mts", "*.config.ts", "scripts/**/*", "src/**/*", "test/**/*"]
+  "include": ["*.config.mts", "*.config.ts", "grammar.js", "scripts/**/*", "src/**/*", "test/**/*"]
 }
