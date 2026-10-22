@@ -153,3 +153,64 @@ test('reads a blank-line prefix without repeatedly requesting its suffix', async
     parser.delete();
   }
 });
+
+test('keeps suites attached across column-zero continuations and incremental undo', async () => {
+  await Parser.init();
+  const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
+  const parser = new Parser().setLanguage(language);
+  try {
+    for (const newline of ['\n', '\r\n', '\r']) {
+      for (const header of ['def function():', 'class Example:', 'try:']) {
+        const suffix = header === 'try:' ? '\nexcept:\n    pass' : '';
+        let source = `${header}\n    pass${suffix}\nafter()\n`.replaceAll('\n', newline);
+        let tree = parser.parse(source)!;
+        const startIndex = header.length + newline.length;
+        const join = `\\${newline}`;
+        const startPosition = newline.endsWith('\n') ? { row: 1, column: 0 } : { row: 0, column: startIndex };
+        const joinedEnd = newline.endsWith('\n') ? { row: 2, column: 0 } : { row: 0, column: startIndex + join.length };
+        try {
+          for (const insertion of [true, false]) {
+            tree.edit(
+              new Edit({
+                startIndex,
+                oldEndIndex: startIndex + (insertion ? 0 : join.length),
+                newEndIndex: startIndex + (insertion ? join.length : 0),
+                startPosition,
+                oldEndPosition: insertion ? startPosition : joinedEnd,
+                newEndPosition: insertion ? joinedEnd : startPosition,
+              })
+            );
+            source = insertion
+              ? source.slice(0, startIndex) + join + source.slice(startIndex)
+              : source.slice(0, startIndex) + source.slice(startIndex + join.length);
+            const incremental = parser.parse(source, tree)!;
+            tree.delete();
+            tree = incremental;
+            const fresh = parser.parse(source)!;
+            try {
+              expect(tree.rootNode.hasError, source).toBe(false);
+              expect(tree.rootNode.toString()).toBe(fresh.rootNode.toString());
+              const suite = tree.rootNode.firstNamedChild!;
+              expect(
+                suite.childForFieldName('body')?.namedChildren.map((node) => node.text),
+                source
+              ).toEqual(['pass']);
+              expect(
+                suite.namedChildren.filter((node) => node.type === 'line_continuation').map((node) => node.text),
+                source
+              ).toEqual(insertion ? [join] : []);
+              expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
+              expect(tree.rootNode.namedChildren).toHaveLength(2);
+            } finally {
+              fresh.delete();
+            }
+          }
+        } finally {
+          tree.delete();
+        }
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});
