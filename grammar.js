@@ -92,6 +92,7 @@ module.exports = grammar({
     'except',
     sym('_format_specifier_content'),
     sym('_line_break'),
+    sym('line_continuation'),
   ],
 
   inline: ($) => [

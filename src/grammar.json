@@ -7278,6 +7278,10 @@
     {
       "type": "SYMBOL",
       "name": "_line_break"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "line_continuation"
     }
   ],
   "inline": [

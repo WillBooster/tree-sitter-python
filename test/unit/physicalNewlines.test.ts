@@ -8,12 +8,23 @@ const invalidStatements = [
   'if enabled\n:\n    pass',
   'value = 1 +\n    2',
   'def function() # header comment\n:\n    pass',
+  'value = 1 + \\\n\n2',
+  'value = 1 + \\\n# comment\n2',
+  'def function(value) \\\n\n:\n    pass',
+  'if enabled:\n    value = 1 + \\\n\n    2',
+  'from module \\\n\nimport first',
 ];
 
 const validStatements = [
   'def function(value):\n    return value',
   'def function(value)\\\n:\n    return value',
   'value = (1 +\n2)',
+  'from module import (\n    first,\n    second,\n)',
+  'from module \\\nimport first',
+  'def function():\n    \\\n    pass',
+  'value = 1 \\\n\nother = 2',
+  '\\\n\nvalue = 1',
+  '\\\n# comment\nvalue = 1',
   'if enabled:\n    value = 1 + \\\n2\n    inside()\noutside()',
   'value = [\n    1, # item comment\n2,\n]',
   'value = {\n    "key":\n1,\n}',
@@ -114,6 +125,31 @@ test('reports newline insertion and removal consistently through incremental edi
     }
   } finally {
     query.delete();
+    parser.delete();
+  }
+});
+
+test('reads a blank-line prefix without repeatedly requesting its suffix', async () => {
+  await Parser.init();
+  const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
+  const parser = new Parser().setLanguage(language);
+  const source = '\n'.repeat(4000) + 'after()\n';
+  let charactersRead = 0;
+  try {
+    const tree = parser.parse((index) => {
+      const chunk = source.slice(index, index + 256);
+      charactersRead += chunk.length;
+      return chunk || undefined;
+    })!;
+    try {
+      expect(tree.rootNode.hasError).toBe(false);
+      expect(tree.rootNode.firstNamedChild?.text).toBe('after()');
+      expect(tree.rootNode.firstNamedChild?.startPosition).toEqual({ row: 4000, column: 0 });
+      expect(charactersRead).toBeLessThan(source.length * 16);
+    } finally {
+      tree.delete();
+    }
+  } finally {
     parser.delete();
   }
 });
