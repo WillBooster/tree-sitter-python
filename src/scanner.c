@@ -94,6 +94,7 @@ typedef struct {
     Array(Delimiter) delimiters;
     bool inside_interpolated_string;
     bool comment_only;
+    bool line_break_ready;
     uint16_t pending_dedents;
     uint32_t bracket_depth;
 } Scanner;
@@ -124,6 +125,24 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         lexer->mark_end(lexer);
         lexer->result_symbol = DEDENT;
         return true;
+    }
+
+    if (scanner->line_break_ready && valid_symbols[LINE_BREAK]) {
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f') {
+            skip(lexer);
+        }
+        if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
+            bool carriage_return = lexer->lookahead == '\r';
+            skip(lexer);
+            if (carriage_return && lexer->lookahead == '\n') {
+                skip(lexer);
+            }
+            lexer->mark_end(lexer);
+            scanner->line_break_ready = false;
+            scanner->comment_only = false;
+            lexer->result_symbol = LINE_BREAK;
+            return true;
+        }
     }
 
     bool advanced_once = false;
@@ -255,10 +274,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (carriage_return && lexer->lookahead == '\n') {
                 skip(lexer);
             }
-            if (!consumed_newline) {
-                lexer->mark_end(lexer);
-                consumed_newline = true;
-            }
+            consumed_newline = true;
         } else if (lexer->lookahead == ' ') {
             indent_length++;
             skip(lexer);
@@ -322,6 +338,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (valid_symbols[INDENT] && !error_recovery_mode && indent_length > current_indent_length) {
                 array_push(&scanner->indents, indent_length);
                 scanner->comment_only = false;
+                scanner->line_break_ready = consumed_newline;
                 lexer->result_symbol = INDENT;
                 return true;
             }
@@ -342,6 +359,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 scanner->bracket_depth = 0;
                 scanner->comment_only = false;
                 scanner->pending_dedents = count_dedents(scanner, dedent_indent);
+                scanner->line_break_ready = consumed_newline;
                 lexer->result_symbol = DEDENT;
                 return true;
             }
@@ -352,6 +370,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (first_comment_indent_length < (int32_t)*array_back(&scanner->indents)) {
                 scanner->pending_dedents = count_dedents(scanner, dedent_indent);
             }
+            scanner->line_break_ready = consumed_newline;
             lexer->result_symbol = NEWLINE;
             return true;
         }
@@ -362,6 +381,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         if (scanner->bracket_depth == 0 && !scanner->inside_interpolated_string) {
             scanner->pending_dedents = count_dedents(scanner, dedent_indent);
         }
+        scanner->line_break_ready = true;
         lexer->result_symbol = LINE_BREAK;
         return true;
     }
@@ -497,6 +517,7 @@ unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buff
 
     buffer[size++] = (char)scanner->inside_interpolated_string;
     buffer[size++] = (char)scanner->comment_only;
+    buffer[size++] = (char)scanner->line_break_ready;
     buffer[size++] = (char)scanner->pending_dedents;
     buffer[size++] = (char)(scanner->pending_dedents >> 8);
     for (uint32_t shift = 0; shift < 32; shift += 8) {
@@ -545,6 +566,7 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
     array_push(&scanner->indents, 0);
     scanner->bracket_depth = 0;
     scanner->comment_only = false;
+    scanner->line_break_ready = false;
     scanner->pending_dedents = 0;
 
     if (length > 0) {
@@ -552,6 +574,7 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
 
         scanner->inside_interpolated_string = (bool)buffer[size++];
         scanner->comment_only = (bool)buffer[size++];
+        scanner->line_break_ready = (bool)buffer[size++];
         scanner->pending_dedents = (uint8_t)buffer[size++];
         scanner->pending_dedents |= (uint16_t)(uint8_t)buffer[size++] << 8;
         for (uint32_t shift = 0; shift < 32; shift += 8) {
