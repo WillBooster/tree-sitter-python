@@ -108,6 +108,7 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
 static bool is_physical_line_start(Scanner *scanner, TSLexer *lexer, uint32_t leading_columns);
+static bool is_layout_extra(int32_t character);
 static bool scan_ignored_line_breaks(Scanner *scanner, TSLexer *lexer);
 static bool scan_line_continuation(Scanner *scanner, TSLexer *lexer);
 static bool skip_line_ending(TSLexer *lexer);
@@ -302,6 +303,9 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (!consumed_newline && !found_line_continuation) leading_columns++;
             indent_length += 8;
             skip(lexer);
+        } else if (is_layout_extra(lexer->lookahead)) {
+            if (!consumed_newline && !found_line_continuation) leading_columns++;
+            skip(lexer);
         } else if (lexer->lookahead == '#' && scanner->bracket_depth == 0 && !consumed_newline && !found_line_continuation &&
                    !valid_symbols[NEWLINE] && valid_symbols[COMMENT] && is_physical_line_start(scanner, lexer, leading_columns)) {
             while (lexer->lookahead && lexer->lookahead != '\n' && lexer->lookahead != '\r') {
@@ -485,10 +489,15 @@ static bool is_physical_line_start(Scanner *scanner, TSLexer *lexer, uint32_t le
     return !scanner->continued_line_start && lexer->get_column(lexer) == scanner->line_start_column + leading_columns;
 }
 
+static bool is_layout_extra(int32_t character) {
+    return character == 0xFEFF || character == 0x2060 || character == 0x200B;
+}
+
 static bool scan_ignored_line_breaks(Scanner *scanner, TSLexer *lexer) {
     bool found_newline = false;
     for (;;) {
-        while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f') {
+        while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f' ||
+               is_layout_extra(lexer->lookahead)) {
             skip(lexer);
         }
         if (lexer->lookahead != '\n' && lexer->lookahead != '\r') {
@@ -510,7 +519,8 @@ static bool scan_ignored_line_breaks(Scanner *scanner, TSLexer *lexer) {
 }
 
 static bool scan_line_continuation(Scanner *scanner, TSLexer *lexer) {
-    while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f') {
+    while (lexer->lookahead == ' ' || lexer->lookahead == '\t' || lexer->lookahead == '\f' ||
+               is_layout_extra(lexer->lookahead)) {
         skip(lexer);
     }
     if (lexer->lookahead != '\\') {
