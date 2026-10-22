@@ -111,7 +111,7 @@ static bool is_physical_line_start(Scanner *scanner, TSLexer *lexer, uint32_t le
 static bool scan_ignored_line_breaks(Scanner *scanner, TSLexer *lexer);
 static bool scan_line_continuation(Scanner *scanner, TSLexer *lexer);
 static bool skip_line_ending(TSLexer *lexer);
-static bool scan_format_specifier(TSLexer *lexer);
+static bool scan_format_specifier(TSLexer *lexer, bool multiline);
 static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol);
 static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols);
 static uint16_t count_dedents(Scanner *scanner, uint16_t indent);
@@ -124,8 +124,14 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
 
     bool error_recovery_mode = valid_symbols[STRING_CONTENT] && valid_symbols[INDENT];
 
-    if (valid_symbols[FORMAT_SPECIFIER_CONTENT] && !error_recovery_mode && scan_format_specifier(lexer)) {
-        return true;
+    if (valid_symbols[FORMAT_SPECIFIER_CONTENT] && !error_recovery_mode) {
+        bool multiline = scanner->delimiters.size > 0 && is_triple(array_back(&scanner->delimiters));
+        if (!multiline && (lexer->lookahead == '\n' || lexer->lookahead == '\r')) {
+            return false;
+        }
+        if (scan_format_specifier(lexer, multiline)) {
+            return true;
+        }
     }
 
     while (scanner->pending_dedents > 0) {
@@ -249,7 +255,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 lexer->mark_end(lexer);
                 return true;
 
-            } else if (lexer->lookahead == '\n' && has_content && !is_triple(delimiter)) {
+            } else if ((lexer->lookahead == '\n' || lexer->lookahead == '\r') && !is_triple(delimiter)) {
                 return false;
             }
             advance(lexer);
@@ -548,14 +554,23 @@ static uint16_t count_dedents(Scanner *scanner, uint16_t indent) {
     return count;
 }
 
-static bool scan_format_specifier(TSLexer *lexer) {
-    while (lexer->lookahead == '\n') {
+static bool scan_format_specifier(TSLexer *lexer, bool multiline) {
+    while (multiline && lexer->lookahead == '\n') {
         skip(lexer);
     }
     bool has_content = false;
-    while (!lexer->eof(lexer) && lexer->lookahead != '{' && lexer->lookahead != '}' && lexer->lookahead != '\n') {
+    while (!lexer->eof(lexer) && lexer->lookahead != '{' && lexer->lookahead != '}' && lexer->lookahead != '\n' &&
+           (multiline || lexer->lookahead != '\r')) {
+        bool escape = !multiline && lexer->lookahead == '\\';
         advance(lexer);
         has_content = true;
+        bool carriage_return = escape && lexer->lookahead == '\r';
+        if (escape && (carriage_return || lexer->lookahead == '\n' || lexer->lookahead == '\\')) {
+            advance(lexer);
+        }
+        if (carriage_return && lexer->lookahead == '\n') {
+            advance(lexer);
+        }
     }
     if (has_content) {
         lexer->mark_end(lexer);
