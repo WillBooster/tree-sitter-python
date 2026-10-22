@@ -128,12 +128,14 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         return true;
     }
 
-    if (scanner->pending_dedents > 0 && valid_symbols[DEDENT] && !error_recovery_mode) {
+    while (scanner->pending_dedents > 0) {
         scanner->pending_dedents--;
         array_pop(&scanner->indents);
-        lexer->mark_end(lexer);
-        lexer->result_symbol = DEDENT;
-        return true;
+        if (valid_symbols[DEDENT]) {
+            lexer->mark_end(lexer);
+            lexer->result_symbol = DEDENT;
+            return true;
+        }
     }
 
     if (scanner->line_break_ready && valid_symbols[LINE_BREAK] && scan_ignored_line_breaks(scanner, lexer)) {
@@ -361,13 +363,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                 return true;
             }
 
-            bool next_tok_is_string_start =
-                lexer->lookahead == '\"' || lexer->lookahead == '\'' || lexer->lookahead == '`';
-
-            if ((valid_symbols[DEDENT] ||
-                 (!valid_symbols[NEWLINE] && !(valid_symbols[STRING_START] && next_tok_is_string_start) &&
-                  scanner->bracket_depth == 0)) &&
-                indent_length < current_indent_length && !scanner->inside_interpolated_string &&
+            if (valid_symbols[DEDENT] && indent_length < current_indent_length && !scanner->inside_interpolated_string &&
 
                 // Wait to create a dedent token until we've consumed any
                 // comments
@@ -383,7 +379,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             }
         }
 
-        if (valid_symbols[NEWLINE] && !error_recovery_mode) {
+        if (valid_symbols[NEWLINE] && (!error_recovery_mode || consumed_newline)) {
             scanner->comment_only = false;
             if (first_comment_indent_length < (int32_t)*array_back(&scanner->indents)) {
                 scanner->pending_dedents = count_dedents(scanner, dedent_indent);
