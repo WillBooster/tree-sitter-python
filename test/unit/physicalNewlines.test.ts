@@ -29,6 +29,8 @@ const validStatements = [
   'value = 1 \\\n\nother = 2',
   '\\\n\nvalue = 1',
   '\\\n# comment\nvalue = 1',
+  'value = 1\r\\\n# comment',
+  '()#\r\\\n# comment',
   'if enabled:\n    value = 1 + \\\n2\n    inside()\noutside()',
   'value = [\n    1, # item comment\n2,\n]',
   'value = {\n    "key":\n1,\n}',
