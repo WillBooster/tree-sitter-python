@@ -76,11 +76,6 @@ module.exports = grammar({
     sym('escape_interpolation'),
     sym('string_end'),
 
-    // Mark comments as external tokens so that the external scanner is always
-    // invoked, even if no external token is expected. This allows for better
-    // error recovery, because the external scanner can maintain the overall
-    // structure by returning dedent tokens whenever a dedent occurs, even
-    // if no dedent is expected.
     sym('comment'),
 
     '(',

@@ -257,11 +257,11 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         }
     }
 
-    bool at_line_start = scanner->bracket_depth == 0 && !valid_symbols[NEWLINE] && !valid_symbols[INDENT] &&
+    bool at_line_start = scanner->bracket_depth == 0 && !scanner->comment_only && !valid_symbols[NEWLINE] && !valid_symbols[INDENT] &&
                          !valid_symbols[DEDENT] && (lexer->lookahead == '\n' || lexer->lookahead == '\r') &&
                          is_physical_line_start(scanner, lexer, 0);
     if (valid_symbols[LINE_BREAK] && !valid_symbols[NEWLINE] && !valid_symbols[INDENT] && !valid_symbols[DEDENT] &&
-        !valid_symbols[STRING_CONTENT] && (scanner->bracket_depth > 0 || (at_line_start && scanner->indents.size == 1)) &&
+        !valid_symbols[STRING_CONTENT] && (scanner->bracket_depth > 0 || scanner->comment_only || (at_line_start && scanner->indents.size == 1)) &&
         scan_ignored_line_breaks(scanner, lexer)) {
         return true;
     }
@@ -297,7 +297,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (!consumed_newline && !found_line_continuation) leading_columns++;
             indent_length += 8;
             skip(lexer);
-        } else if (lexer->lookahead == '#' && !consumed_newline && !found_line_continuation &&
+        } else if (lexer->lookahead == '#' && scanner->bracket_depth == 0 && !consumed_newline && !found_line_continuation &&
                    !valid_symbols[NEWLINE] && valid_symbols[COMMENT] && is_physical_line_start(scanner, lexer, leading_columns)) {
             while (lexer->lookahead && lexer->lookahead != '\n' && lexer->lookahead != '\r') {
                 advance(lexer);
