@@ -64,6 +64,63 @@ test('rejects physical endings in single-line literals without swallowing follow
   }
 });
 
+test('preserves raw quote escapes and accepts physical endings only after odd backslashes', async () => {
+  await Parser.init();
+  const parser = new Parser().setLanguage(
+    await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'))
+  );
+  try {
+    for (const newline of ['\r', '\n', '\r\n']) {
+      for (const prefix of ['r', 'rb', 'fr']) {
+        for (const quote of ["'", '"']) {
+          for (const triple of [false, true]) {
+            const delimiter = quote.repeat(triple ? 3 : 1);
+            for (const count of [1, 2, 3, 4]) {
+              const content = 'ab' + '\\'.repeat(count) + newline + 'cd';
+              const literal = `${prefix}${delimiter}${content}${delimiter}`;
+              const source = `x = ${literal}${newline}after()${newline}`;
+              const tree = parser.parse(source)!;
+              try {
+                const valid = triple || count % 2 === 1;
+                expect(tree.rootNode.hasError, source).toBe(!valid);
+                expect(
+                  tree.rootNode.descendantsOfType('call').map((node) => node.text),
+                  source
+                ).toContain('after()');
+                if (valid) {
+                  const strings = tree.rootNode.descendantsOfType('string');
+                  expect(
+                    strings.map((node) => node.text),
+                    source
+                  ).toEqual([literal]);
+                  expect(strings.map((node) => [node.startIndex, node.endIndex])).toEqual([[4, 4 + literal.length]]);
+                  expect(tree.rootNode.descendantsOfType('string_content').map((node) => node.text)).toEqual([content]);
+                }
+              } finally {
+                tree.delete();
+              }
+            }
+            const escapedQuote = `ab\\${quote}cd`;
+            const literal = `${prefix}${delimiter}${escapedQuote}${delimiter}`;
+            const tree = parser.parse(`x = ${literal}${newline}after()${newline}`)!;
+            try {
+              expect(tree.rootNode.hasError).toBe(false);
+              expect(tree.rootNode.descendantsOfType('string_content').map((node) => node.text)).toEqual([
+                escapedQuote,
+              ]);
+              expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
+            } finally {
+              tree.delete();
+            }
+          }
+        }
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});
+
 test('reparses inserted and undone string endings with fresh-parser ranges', async () => {
   await Parser.init();
   const parser = new Parser().setLanguage(

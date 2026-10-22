@@ -190,8 +190,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                     advance(lexer);
                     if (lexer->lookahead == end_character(delimiter) || lexer->lookahead == '\\') {
                         advance(lexer);
-                    }
-                    if (lexer->lookahead == '\r') {
+                    } else if (lexer->lookahead == '\r') {
                         advance(lexer);
                         if (lexer->lookahead == '\n') {
                             advance(lexer);
