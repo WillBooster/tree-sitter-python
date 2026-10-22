@@ -6588,7 +6588,7 @@
                 },
                 {
                   "type": "PATTERN",
-                  "value": "\\r?\\n"
+                  "value": "\\r\\n?|\\n"
                 },
                 {
                   "type": "PATTERN",

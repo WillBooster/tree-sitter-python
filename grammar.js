@@ -964,7 +964,7 @@ module.exports = grammar({
               /U[a-fA-F\d]{8}/,
               /x[a-fA-F\d]{2}/,
               /\d{1,3}/,
-              /\r?\n/,
+              /\r\n?|\n/,
               /['"abfrntv\\]/,
               /N\{[^}]+\}/
             )
