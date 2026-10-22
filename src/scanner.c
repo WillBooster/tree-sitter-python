@@ -97,12 +97,14 @@ typedef struct {
     bool line_break_ready;
     uint16_t pending_dedents;
     uint32_t bracket_depth;
+    uint32_t line_start_column;
 } Scanner;
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
+static void skip_line_ending(TSLexer *lexer);
 static bool scan_format_specifier(TSLexer *lexer);
 static bool emit_bracket(Scanner *scanner, TSLexer *lexer, enum TokenType symbol);
 static bool scan_bracket(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols);
@@ -132,12 +134,9 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             skip(lexer);
         }
         if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
-            bool carriage_return = lexer->lookahead == '\r';
-            skip(lexer);
-            if (carriage_return && lexer->lookahead == '\n') {
-                skip(lexer);
-            }
+            skip_line_ending(lexer);
             lexer->mark_end(lexer);
+            scanner->line_start_column = lexer->get_column(lexer);
             scanner->line_break_ready = false;
             scanner->comment_only = false;
             lexer->result_symbol = LINE_BREAK;
@@ -258,7 +257,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
 
     lexer->mark_end(lexer);
 
-    bool at_line_start = lexer->get_column(lexer) == 0;
+    bool at_line_start = lexer->get_column(lexer) == scanner->line_start_column;
     bool found_end_of_line = false;
     bool consumed_newline = false;
     bool ignore_newline = at_line_start || scanner->bracket_depth > 0 || scanner->comment_only;
@@ -269,11 +268,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
             found_end_of_line = true;
             indent_length = 0;
-            bool carriage_return = lexer->lookahead == '\r';
-            skip(lexer);
-            if (carriage_return && lexer->lookahead == '\n') {
-                skip(lexer);
-            }
+            skip_line_ending(lexer);
             consumed_newline = true;
         } else if (lexer->lookahead == ' ') {
             indent_length++;
@@ -305,10 +300,12 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             if (first_comment_indent_length == -1) {
                 first_comment_indent_length = (int32_t)indent_length;
             }
-            while (lexer->lookahead && lexer->lookahead != '\n') {
+            while (lexer->lookahead && lexer->lookahead != '\n' && lexer->lookahead != '\r') {
                 skip(lexer);
             }
-            skip(lexer);
+            if (lexer->lookahead) {
+                skip_line_ending(lexer);
+            }
             indent_length = 0;
         } else if (lexer->lookahead == '\\') {
             found_line_continuation = true;
@@ -457,6 +454,14 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     return false;
 }
 
+static void skip_line_ending(TSLexer *lexer) {
+    bool carriage_return = lexer->lookahead == '\r';
+    skip(lexer);
+    if (carriage_return && lexer->lookahead == '\n') {
+        skip(lexer);
+    }
+}
+
 static uint16_t count_dedents(Scanner *scanner, uint16_t indent) {
     uint16_t count = 0;
     for (uint32_t index = scanner->indents.size; index > 1 && *array_get(&scanner->indents, index - 1) > indent; index--) {
@@ -524,6 +529,10 @@ unsigned tree_sitter_python_external_scanner_serialize(void *payload, char *buff
         buffer[size++] = (char)(scanner->bracket_depth >> shift);
     }
 
+    for (uint32_t shift = 0; shift < 32; shift += 8) {
+        buffer[size++] = (char)(scanner->line_start_column >> shift);
+    }
+
     size_t delimiter_count = scanner->delimiters.size > UINT8_MAX ? UINT8_MAX : scanner->delimiters.size;
     buffer[size++] = (char)delimiter_count;
 
@@ -565,6 +574,7 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
     array_delete(&scanner->indents);
     array_push(&scanner->indents, 0);
     scanner->bracket_depth = 0;
+    scanner->line_start_column = 0;
     scanner->comment_only = false;
     scanner->line_break_ready = false;
     scanner->pending_dedents = 0;
@@ -579,6 +589,10 @@ void tree_sitter_python_external_scanner_deserialize(void *payload, const char *
         scanner->pending_dedents |= (uint16_t)(uint8_t)buffer[size++] << 8;
         for (uint32_t shift = 0; shift < 32; shift += 8) {
             scanner->bracket_depth |= (uint32_t)(uint8_t)buffer[size++] << shift;
+        }
+
+        for (uint32_t shift = 0; shift < 32; shift += 8) {
+            scanner->line_start_column |= (uint32_t)(uint8_t)buffer[size++] << shift;
         }
 
         size_t delimiter_count = (uint8_t)buffer[size++];

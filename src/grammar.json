@@ -7076,7 +7076,7 @@
           },
           {
             "type": "PATTERN",
-            "value": ".*"
+            "value": "[^\\r\\n]*"
           }
         ]
       }
@@ -7097,22 +7097,26 @@
                 "type": "SEQ",
                 "members": [
                   {
+                    "type": "STRING",
+                    "value": "\r"
+                  },
+                  {
                     "type": "CHOICE",
                     "members": [
                       {
                         "type": "STRING",
-                        "value": "\r"
+                        "value": "\n"
                       },
                       {
                         "type": "BLANK"
                       }
                     ]
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "\n"
                   }
                 ]
+              },
+              {
+                "type": "STRING",
+                "value": "\n"
               },
               {
                 "type": "STRING",

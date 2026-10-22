@@ -30,7 +30,7 @@ test('distinguishes physical newlines from joined logical lines without losing f
   const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
   const parser = new Parser().setLanguage(language);
   try {
-    for (const newline of ['\n', '\r\n']) {
+    for (const newline of ['\n', '\r\n', '\r']) {
       for (const [statements, hasError] of [
         [invalidStatements, true],
         [validStatements, false],
@@ -42,8 +42,8 @@ test('distinguishes physical newlines from joined logical lines without losing f
             expect(tree.rootNode.hasError, source).toBe(hasError);
             expect(tree.rootNode.lastNamedChild?.text, source).toBe('after()');
             expect(tree.rootNode.lastNamedChild?.startPosition, source).toEqual({
-              row: source.split('\n').length - 2,
-              column: 0,
+              row: source.slice(0, source.lastIndexOf('after()')).split('\n').length - 1,
+              column: source.lastIndexOf('after()') - source.lastIndexOf('\n', source.lastIndexOf('after()') - 1) - 1,
             });
           } finally {
             tree.delete();
@@ -62,51 +62,55 @@ test('reports newline insertion and removal consistently through incremental edi
   const parser = new Parser().setLanguage(language);
   const query = new Query(language, '(call function: (identifier) @call)\n(return_statement (identifier) @value)');
   try {
-    let source = 'def function(value):\n    return value\nafter()\n';
-    let tree = parser.parse(source)!;
-    const startIndex = source.indexOf(':');
-    try {
-      for (const insertion of [true, false]) {
-        const row = insertion ? 0 : 1;
-        tree.edit(
-          new Edit({
-            startIndex,
-            oldEndIndex: startIndex + (insertion ? 0 : 1),
-            newEndIndex: startIndex + (insertion ? 1 : 0),
-            startPosition: { row: 0, column: startIndex },
-            oldEndPosition: { row, column: insertion ? startIndex : 0 },
-            newEndPosition: { row: insertion ? 1 : 0, column: insertion ? 0 : startIndex },
-          })
-        );
-        source = insertion
-          ? source.slice(0, startIndex) + '\n' + source.slice(startIndex)
-          : source.slice(0, startIndex) + source.slice(startIndex + 1);
-        const incremental = parser.parse(source, tree)!;
-        tree.delete();
-        tree = incremental;
-        const fresh = parser.parse(source)!;
-        try {
-          expect(tree.rootNode.hasError, source).toBe(insertion);
-          expect(tree.rootNode.toString()).toBe(fresh.rootNode.toString());
-          const captures = (root: typeof tree.rootNode): [string, string, number, number, Point, Point][] =>
-            query
-              .captures(root)
-              .map(({ name, node }) => [
-                name,
-                node.text,
-                node.startIndex,
-                node.endIndex,
-                node.startPosition,
-                node.endPosition,
-              ]);
-          expect(captures(tree.rootNode)).toEqual(captures(fresh.rootNode));
-          expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
-        } finally {
-          fresh.delete();
+    for (const newline of ['\n', '\r\n', '\r']) {
+      let source = 'def function(value):\n    return value\nafter()\n'.replaceAll('\n', newline);
+      let tree = parser.parse(source)!;
+      const startIndex = source.indexOf(':');
+      try {
+        for (const insertion of [true, false]) {
+          const joinedEnd = newline.endsWith('\n')
+            ? { row: 1, column: 0 }
+            : { row: 0, column: startIndex + newline.length };
+          tree.edit(
+            new Edit({
+              startIndex,
+              oldEndIndex: startIndex + (insertion ? 0 : newline.length),
+              newEndIndex: startIndex + (insertion ? newline.length : 0),
+              startPosition: { row: 0, column: startIndex },
+              oldEndPosition: insertion ? { row: 0, column: startIndex } : joinedEnd,
+              newEndPosition: insertion ? joinedEnd : { row: 0, column: startIndex },
+            })
+          );
+          source = insertion
+            ? source.slice(0, startIndex) + newline + source.slice(startIndex)
+            : source.slice(0, startIndex) + source.slice(startIndex + newline.length);
+          const incremental = parser.parse(source, tree)!;
+          tree.delete();
+          tree = incremental;
+          const fresh = parser.parse(source)!;
+          try {
+            expect(tree.rootNode.hasError, source).toBe(insertion);
+            expect(tree.rootNode.toString()).toBe(fresh.rootNode.toString());
+            const captures = (root: typeof tree.rootNode): [string, string, number, number, Point, Point][] =>
+              query
+                .captures(root)
+                .map(({ name, node }) => [
+                  name,
+                  node.text,
+                  node.startIndex,
+                  node.endIndex,
+                  node.startPosition,
+                  node.endPosition,
+                ]);
+            expect(captures(tree.rootNode)).toEqual(captures(fresh.rootNode));
+            expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
+          } finally {
+            fresh.delete();
+          }
         }
+      } finally {
+        tree.delete();
       }
-    } finally {
-      tree.delete();
     }
   } finally {
     query.delete();

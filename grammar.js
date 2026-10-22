@@ -1023,9 +1023,9 @@ module.exports = grammar({
 
     await: ($) => prec(PREC.unary, seq('await', $.primary_expression)),
 
-    comment: () => token(seq('#', /.*/)),
+    comment: () => token(seq('#', /[^\r\n]*/)),
 
-    line_continuation: () => token(seq('\\', choice(seq(optional('\r'), '\n'), '\0'))),
+    line_continuation: () => token(seq('\\', choice(seq('\r', optional('\n')), '\n', '\0'))),
 
     positional_separator: () => '/',
     keyword_separator: () => '*',
