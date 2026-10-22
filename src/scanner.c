@@ -268,6 +268,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     bool found_end_of_line = false;
     bool consumed_newline = false;
     bool found_line_continuation = false;
+    bool leading_continuation = false;
     bool continuation_starts_line = false;
     uint32_t leading_columns = 0;
     bool ignore_newline = at_line_start || scanner->bracket_depth > 0 || scanner->comment_only;
@@ -275,9 +276,6 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
     int32_t first_comment_indent_length = -1;
     for (;;) {
         if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
-            if (found_line_continuation && !consumed_newline) {
-                break;
-            }
             if (!consumed_newline && !found_line_continuation && !ignore_newline && !valid_symbols[NEWLINE]) {
                 ignore_newline |= is_physical_line_start(scanner, lexer, leading_columns);
             }
@@ -328,6 +326,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
             indent_length = 0;
         } else if (lexer->lookahead == '\\') {
             if (!consumed_newline && !found_line_continuation) {
+                leading_continuation = true;
                 continuation_starts_line = is_physical_line_start(scanner, lexer, leading_columns);
             }
             skip(lexer);
@@ -395,7 +394,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         }
     }
 
-    if (!consumed_newline && found_line_continuation && valid_symbols[LINE_BREAK]) {
+    if (found_line_continuation && leading_continuation && valid_symbols[LINE_BREAK]) {
         scanner->continuation_ready = true;
         scanner->continued_line_start = !continuation_starts_line;
         lexer->result_symbol = LINE_BREAK;
