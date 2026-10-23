@@ -6588,7 +6588,7 @@
                 },
                 {
                   "type": "PATTERN",
-                  "value": "\\r?\\n"
+                  "value": "\\r\\n?|\\n"
                 },
                 {
                   "type": "PATTERN",
@@ -7076,49 +7076,7 @@
           },
           {
             "type": "PATTERN",
-            "value": ".*"
-          }
-        ]
-      }
-    },
-    "line_continuation": {
-      "type": "TOKEN",
-      "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "STRING",
-            "value": "\\"
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": "\r"
-                      },
-                      {
-                        "type": "BLANK"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "STRING",
-                    "value": "\n"
-                  }
-                ]
-              },
-              {
-                "type": "STRING",
-                "value": "\u0000"
-              }
-            ]
+            "value": "[^\\r\\n]*"
           }
         ]
       }
@@ -7139,11 +7097,15 @@
     },
     {
       "type": "PATTERN",
-      "value": "[\\s\\f\\uFEFF\\u2060\\u200B]|\\r?\\n"
+      "value": "[ \\t\\f\\uFEFF\\u2060\\u200B]"
     },
     {
       "type": "SYMBOL",
       "name": "line_continuation"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_line_break"
     }
   ],
   "conflicts": [
@@ -7266,6 +7228,14 @@
     {
       "type": "SYMBOL",
       "name": "_format_specifier_content"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_line_break"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "line_continuation"
     }
   ],
   "inline": [

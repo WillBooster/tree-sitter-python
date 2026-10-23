@@ -40,7 +40,7 @@ const SEMICOLON = ';';
 module.exports = grammar({
   name: 'python',
 
-  extras: ($) => [$.comment, /[\s\f\uFEFF\u2060\u200B]|\r?\n/, $.line_continuation],
+  extras: ($) => [$.comment, /[ \t\f\uFEFF\u2060\u200B]/, sym('line_continuation'), sym('_line_break')],
 
   conflicts: ($) => [
     [$.default_type_parameter, $._default_type_primary, $.primary_expression],
@@ -76,11 +76,6 @@ module.exports = grammar({
     sym('escape_interpolation'),
     sym('string_end'),
 
-    // Mark comments as external tokens so that the external scanner is always
-    // invoked, even if no external token is expected. This allows for better
-    // error recovery, because the external scanner can maintain the overall
-    // structure by returning dedent tokens whenever a dedent occurs, even
-    // if no dedent is expected.
     sym('comment'),
 
     '(',
@@ -91,6 +86,8 @@ module.exports = grammar({
     '}',
     'except',
     sym('_format_specifier_content'),
+    sym('_line_break'),
+    sym('line_continuation'),
   ],
 
   inline: ($) => [
@@ -962,7 +959,7 @@ module.exports = grammar({
               /U[a-fA-F\d]{8}/,
               /x[a-fA-F\d]{2}/,
               /\d{1,3}/,
-              /\r?\n/,
+              /\r\n?|\n/,
               /['"abfrntv\\]/,
               /N\{[^}]+\}/
             )
@@ -1022,9 +1019,7 @@ module.exports = grammar({
 
     await: ($) => prec(PREC.unary, seq('await', $.primary_expression)),
 
-    comment: () => token(seq('#', /.*/)),
-
-    line_continuation: () => token(seq('\\', choice(seq(optional('\r'), '\n'), '\0'))),
+    comment: () => token(seq('#', /[^\r\n]*/)),
 
     positional_separator: () => '/',
     keyword_separator: () => '*',
