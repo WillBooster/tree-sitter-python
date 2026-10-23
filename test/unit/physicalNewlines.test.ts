@@ -252,3 +252,70 @@ test('preserves suite boundaries and continuation ranges through incremental edi
     parser.delete();
   }
 });
+
+test('rejects a continuation at EOF and reparses a following physical line through edit and undo', async () => {
+  await Parser.init();
+  const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
+  const parser = new Parser().setLanguage(language);
+  try {
+    for (const newline of ['\n', '\r\n', '\r']) {
+      for (const prefix of ['', 'x = 1 ', `def function():${newline}    pass${newline}`]) {
+        const unfinished = `${prefix}\\${newline}`;
+        for (const suffix of [newline, '# comment', `# comment${newline}`, ' ', '\t']) {
+          const tree = parser.parse(unfinished + suffix)!;
+          try {
+            expect(tree.rootNode.hasError, unfinished + suffix).toBe(false);
+            expect(
+              tree.rootNode
+                .descendantsOfType('line_continuation')
+                .map((node) => [node.text, node.startIndex, node.endIndex])
+            ).toEqual([[`\\${newline}`, prefix.length, unfinished.length]]);
+          } finally {
+            tree.delete();
+          }
+        }
+        let source = unfinished;
+        let tree = parser.parse(source)!;
+        const startIndex = source.length;
+        const startPosition = {
+          row: source.split('\n').length - 1,
+          column: startIndex - source.lastIndexOf('\n') - 1,
+        };
+        const suffix = '# comment';
+        const endPosition = { row: startPosition.row, column: startPosition.column + suffix.length };
+        try {
+          expect(tree.rootNode.hasError, source).toBe(true);
+          for (const insertion of [true, false]) {
+            tree.edit(
+              new Edit({
+                startIndex,
+                oldEndIndex: startIndex + (insertion ? 0 : suffix.length),
+                newEndIndex: startIndex + (insertion ? suffix.length : 0),
+                startPosition,
+                oldEndPosition: insertion ? startPosition : endPosition,
+                newEndPosition: insertion ? endPosition : startPosition,
+              })
+            );
+            source = insertion ? unfinished + suffix : unfinished;
+            const incremental = parser.parse(source, tree)!;
+            tree.delete();
+            tree = incremental;
+            const fresh = parser.parse(source)!;
+            try {
+              expect(tree.rootNode.hasError, source).toBe(!insertion);
+              expect(tree.rootNode.toString()).toBe(fresh.rootNode.toString());
+              expect(tree.rootNode.endIndex).toBe(fresh.rootNode.endIndex);
+              expect(tree.rootNode.endPosition).toEqual(fresh.rootNode.endPosition);
+            } finally {
+              fresh.delete();
+            }
+          }
+        } finally {
+          tree.delete();
+        }
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});

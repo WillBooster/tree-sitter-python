@@ -911,7 +911,8 @@ def foo():
       (pass_statement)))
   (line_continuation)
   (line_continuation)
-  (line_continuation))
+  (ERROR
+    (UNEXPECTED '\')))
 
 ================================================================================
 Empty blocks

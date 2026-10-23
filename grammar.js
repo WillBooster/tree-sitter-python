@@ -40,7 +40,7 @@ const SEMICOLON = ';';
 module.exports = grammar({
   name: 'python',
 
-  extras: ($) => [$.comment, /[ \t\f\uFEFF\u2060\u200B]/, $.line_continuation, sym('_line_break')],
+  extras: ($) => [$.comment, /[ \t\f\uFEFF\u2060\u200B]/, sym('line_continuation'), sym('_line_break')],
 
   conflicts: ($) => [
     [$.default_type_parameter, $._default_type_primary, $.primary_expression],
@@ -1020,8 +1020,6 @@ module.exports = grammar({
     await: ($) => prec(PREC.unary, seq('await', $.primary_expression)),
 
     comment: () => token(seq('#', /[^\r\n]*/)),
-
-    line_continuation: () => token(seq('\\', choice(seq('\r', optional('\n')), '\n', '\0'))),
 
     positional_separator: () => '/',
     keyword_separator: () => '*',

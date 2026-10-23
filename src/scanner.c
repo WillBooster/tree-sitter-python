@@ -537,6 +537,9 @@ static bool scan_line_continuation(Scanner *scanner, TSLexer *lexer) {
         advance(lexer);
         line_feed = true;
     }
+    if (lexer->eof(lexer)) {
+        return false;
+    }
     lexer->mark_end(lexer);
     lexer->result_symbol = LINE_CONTINUATION;
     scanner->continuation_ready = false;
