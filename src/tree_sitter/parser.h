@@ -52,6 +52,14 @@ typedef struct {
   uint32_t column;
 } TSLexerPosition;
 
+/**
+ * Checkpoints may only restore marks during the lex invocation that captured them.
+ * Their contents must not be inspected or serialized as scanner state.
+ */
+typedef struct {
+  uint32_t _opaque[3];
+} TSLexerCheckpoint;
+
 struct TSLexer {
   int32_t lookahead;
   TSSymbol result_symbol;
@@ -62,10 +70,12 @@ struct TSLexer {
   bool (*eof)(const TSLexer *);
   void (*log)(const TSLexer *, const char *, ...);
   void (*get_position)(const TSLexer *, TSLexerPosition *);
-  void (*mark_start)(TSLexer *, const TSLexerPosition *);
-  void (*mark_end_at)(TSLexer *, const TSLexerPosition *);
+  void (*mark_start)(TSLexer *, const TSLexerCheckpoint *);
+  void (*mark_end_at)(TSLexer *, const TSLexerCheckpoint *);
   void (*get_mark_end)(const TSLexer *, TSLexerPosition *);
   uint32_t (*get_display_column)(TSLexer *, uint32_t tab_width);
+  void (*get_checkpoint)(const TSLexer *, TSLexerCheckpoint *);
+  void (*get_mark_end_checkpoint)(const TSLexer *, TSLexerCheckpoint *);
 };
 
 typedef enum {
@@ -101,13 +111,17 @@ typedef struct {
   uint16_t reserved_word_set_id;
 } TSLexerMode;
 
-typedef union {
-  TSParseAction action;
-  struct {
-    uint8_t count;
-    bool reusable;
-  } entry;
-} TSParseActionEntry;
+// `parse_actions` packs each action list into one word per action. Every word holds an action's type in bits
+// 0-2, a shift's `extra` and `repetition` flags in bits 3 and 4, and in bits 8-23 a shift's state or the word
+// index of a reduce's record. The first word of a list also holds the list's `reusable` flag in bit 24 and its
+// action count in bits 25-31; an empty list is a single zero word. A reduce record is two words: the symbol and
+// child count, then the dynamic precedence and production id.
+#define TS_PARSE_ACTION_TYPE_MASK 0x7u
+#define TS_PARSE_ACTION_EXTRA 0x8u
+#define TS_PARSE_ACTION_REPETITION 0x10u
+#define TS_PARSE_ACTION_MASK 0xffffffu
+#define TS_PARSE_ACTION_REUSABLE 0x1000000u
+#define TS_PARSE_ACTION_COUNT_SHIFT 25
 
 typedef struct {
   int32_t start;
@@ -130,7 +144,7 @@ struct TSLanguage {
   const uint16_t *parse_table;
   const uint16_t *small_parse_table;
   const uint32_t *small_parse_table_map;
-  const TSParseActionEntry *parse_actions;
+  const uint32_t *parse_actions;
   const char * const *symbol_names;
   const char * const *field_names;
   const TSMapSlice *field_map_slices;
@@ -252,57 +266,26 @@ static inline bool set_contains(const TSCharacterRange *ranges, uint32_t len, in
 
 #define ACTIONS(id) id
 
-#define SHIFT(state_value)            \
-  {{                                  \
-    .shift = {                        \
-      .type = TSParseActionTypeShift, \
-      .state = (state_value)          \
-    }                                 \
-  }}
+#define ACTION_LIST(count, reusable) \
+  (((uint32_t)(count) << TS_PARSE_ACTION_COUNT_SHIFT) | ((reusable) ? TS_PARSE_ACTION_REUSABLE : 0))
 
-#define SHIFT_REPEAT(state_value)     \
-  {{                                  \
-    .shift = {                        \
-      .type = TSParseActionTypeShift, \
-      .state = (state_value),         \
-      .repetition = true              \
-    }                                 \
-  }}
+#define SHIFT(state_value) (TSParseActionTypeShift | ((uint32_t)(state_value) << 8))
 
-#define SHIFT_EXTRA()                 \
-  {{                                  \
-    .shift = {                        \
-      .type = TSParseActionTypeShift, \
-      .extra = true                   \
-    }                                 \
-  }}
+#define SHIFT_REPEAT(state_value) (SHIFT(state_value) | TS_PARSE_ACTION_REPETITION)
 
-#define REDUCE_ACTION(action_type, symbol_name, children, precedence, prod_id)\
-  {{                                                                          \
-    .reduce = {                                                               \
-      .type = action_type,                                                    \
-      .symbol = symbol_name,                                                  \
-      .child_count = children,                                                \
-      .dynamic_precedence = precedence,                                       \
-      .production_id = prod_id                                                \
-    },                                                                        \
-  }}
+#define SHIFT_EXTRA() (TSParseActionTypeShift | TS_PARSE_ACTION_EXTRA)
 
-#define REDUCE(symbol_name, children, precedence, prod_id) \
-  REDUCE_ACTION(TSParseActionTypeReduce, symbol_name, children, precedence, prod_id)
+#define REDUCE(record) (TSParseActionTypeReduce | ((uint32_t)(record) << 8))
 
-#define REDUCE_EXTRA(symbol_name, children, precedence, prod_id) \
-  REDUCE_ACTION(TSParseActionTypeReduceExtra, symbol_name, children, precedence, prod_id)
+#define REDUCE_EXTRA(record) (TSParseActionTypeReduceExtra | ((uint32_t)(record) << 8))
 
-#define RECOVER()                    \
-  {{                                 \
-    .type = TSParseActionTypeRecover \
-  }}
+#define RECOVER() TSParseActionTypeRecover
 
-#define ACCEPT_INPUT()              \
-  {{                                \
-    .type = TSParseActionTypeAccept \
-  }}
+#define ACCEPT_INPUT() TSParseActionTypeAccept
+
+#define REDUCE_RECORD(symbol_name, children, precedence, prod_id)       \
+  (uint32_t)(symbol_name) | ((uint32_t)(children) << 16),               \
+  (uint32_t)(uint16_t)(precedence) | ((uint32_t)(prod_id) << 16)
 
 #ifdef __cplusplus
 }

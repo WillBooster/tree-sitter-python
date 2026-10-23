@@ -135,25 +135,38 @@ test('reports newline insertion and removal consistently through incremental edi
   }
 });
 
-test('reads a blank-line prefix without repeatedly requesting its suffix', async () => {
+test('reads physical blank and comment lines with bounded input work', async () => {
   await Parser.init();
   const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
   const parser = new Parser().setLanguage(language);
-  const source = '\n'.repeat(4000) + 'after()\n';
-  let charactersRead = 0;
   try {
-    const tree = parser.parse((index) => {
-      const chunk = source.slice(index, index + 256);
-      charactersRead += chunk.length;
-      return chunk || undefined;
-    })!;
-    try {
-      expect(tree.rootNode.hasError).toBe(false);
-      expect(tree.rootNode.firstNamedChild?.text).toBe('after()');
-      expect(tree.rootNode.firstNamedChild?.startPosition).toEqual({ row: 4000, column: 0 });
-      expect(charactersRead).toBeLessThan(source.length * 16);
-    } finally {
-      tree.delete();
+    for (const source of [
+      '\n'.repeat(4000) + 'after()\n',
+      '\r# c\r'.repeat(2000) + 'after()\r',
+      '\r# λ🦀\r'.repeat(2000) + 'after()\r',
+      '\uFEFF' + '\r# c\r'.repeat(2000) + 'after()\r',
+      '\uFEFF# λ🦀\r' + '\r\\\r# c\r'.repeat(2000) + 'after()\r',
+      'values = [\r' + '    1,\r'.repeat(4000) + ']\rafter()\r',
+      'x = 1\r'.repeat(4000) + 'after()\r',
+    ]) {
+      let charactersRead = 0;
+      const tree = parser.parse((index) => {
+        const chunk = source.slice(index, index + 256);
+        charactersRead += chunk.length;
+        return chunk || undefined;
+      })!;
+      try {
+        expect(tree.rootNode.hasError).toBe(false);
+        expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
+        const afterIndex = source.lastIndexOf('after()');
+        expect(tree.rootNode.lastNamedChild?.startPosition).toEqual({
+          row: source.slice(0, afterIndex).split('\n').length - 1,
+          column: afterIndex - source.lastIndexOf('\n', afterIndex - 1) - 1,
+        });
+        expect(charactersRead).toBeLessThan(source.length * 16);
+      } finally {
+        tree.delete();
+      }
     }
   } finally {
     parser.delete();
