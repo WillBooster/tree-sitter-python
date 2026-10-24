@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
+
 import { testCommand } from './run.js';
 
 test('highlights defaulted type parameter names, bounds, and direct defaults as types', async () => {

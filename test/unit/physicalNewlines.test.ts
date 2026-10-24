@@ -1,5 +1,6 @@
 import path from 'node:path';
-import { Edit, Language, Parser, Query, type Point } from '@willbooster/web-tree-sitter';
+
+import { Edit, Language, Parser, type Point, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 const invalidStatements = [
