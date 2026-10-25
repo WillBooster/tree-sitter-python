@@ -536,10 +536,9 @@ module.exports = grammar({
 
     decorator: ($) => seq('@', $.expression, sym('_newline')),
 
-    _suite: ($) =>
-      choice(alias($._simple_statements, $.block), seq(sym('_indent'), $.block), alias(sym('_newline'), $.block)),
+    _suite: ($) => choice(alias($._simple_statements, $.block), $.block, alias(sym('_newline'), $.block)),
 
-    block: ($) => seq(repeat($._statement), sym('_dedent')),
+    block: ($) => seq(sym('_indent'), repeat($._statement), sym('_dedent')),
 
     expression_list: ($) =>
       prec.dynamic(1, prec.right(seq(choice($.expression, $.list_splat), ',', optional($._collection_elements)))),

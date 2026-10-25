@@ -3112,17 +3112,8 @@
           "value": "block"
         },
         {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_indent"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "block"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "block"
         },
         {
           "type": "ALIAS",
@@ -3138,6 +3129,10 @@
     "block": {
       "type": "SEQ",
       "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_indent"
+        },
         {
           "type": "REPEAT",
           "content": {
