@@ -221,7 +221,10 @@ test('preserves suite boundaries and continuation ranges through incremental edi
                 expect(tree.rootNode.toString()).toBe(fresh.rootNode.toString());
                 const suite = tree.rootNode.namedChildren[1]!;
                 expect(
-                  suite.childForFieldName('body')?.namedChildren.map((node) => node.text),
+                  suite
+                    .childForFieldName('body')
+                    ?.namedChildren.filter((node) => !node.isExtra)
+                    .map((node) => node.text),
                   source
                 ).toEqual(['pass']);
                 if (!bodyStart) expect(suite.text, source).toBe(declaration);

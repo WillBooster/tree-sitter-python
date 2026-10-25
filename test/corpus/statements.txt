@@ -1186,10 +1186,10 @@ if a:
 (module
   (if_statement
     (identifier)
-    (comment)
-    (comment)
-    (comment)
     (block
+      (comment)
+      (comment)
+      (comment)
       (expression_statement
         (identifier))
       (comment)
