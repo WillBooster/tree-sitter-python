@@ -25,6 +25,11 @@ test('parses continuation operands in their suite', async () => {
       const tree = parser.parse(source)!;
       try {
         expect(tree.rootNode.hasError, source).toBe(false);
+        const suite = tree.rootNode.firstNamedChild?.childForFieldName('consequence');
+        expect(suite?.namedChildCount).toBe(2);
+        expect(suite?.lastNamedChild?.text).toBe('still_inside()');
+        expect(tree.rootNode.namedChildCount).toBe(2);
+        expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
       } finally {
         tree.delete();
       }
