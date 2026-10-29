@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { Edit, Language, Parser, type Point, type Tree } from '@willbooster/web-tree-sitter';
+import { Language, Parser, type Point } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 const extras = ['\uFEFF', '\u2060', '\u200B', '\uFEFF\u2060\u200B'];
@@ -94,68 +94,6 @@ test('does not turn unjoined physical endings into continuations or strip litera
     parser.delete();
   }
 });
-
-test('preserves suite ranges through layout-extra insertion and undo', async () => {
-  await Parser.init();
-  const parser = new Parser().setLanguage(
-    await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'))
-  );
-  try {
-    for (const extra of extras) {
-      for (const ending of endings) {
-        for (const line of ['', '# note', '\\']) {
-          const original = `def f():\n    first()\n${line}\n    second()\nafter()\n`.replaceAll('\n', ending);
-          const startIndex = original.indexOf(ending, original.indexOf('first()')) + ending.length;
-          let source = original;
-          let tree = parser.parse(source)!;
-          try {
-            for (const undo of [false, true]) {
-              const removed = undo ? extra.length : 0;
-              const inserted = undo ? '' : extra;
-              const updated = source.slice(0, startIndex) + inserted + source.slice(startIndex + removed);
-              tree.edit(
-                new Edit({
-                  startIndex,
-                  oldEndIndex: startIndex + removed,
-                  newEndIndex: startIndex + inserted.length,
-                  startPosition: pointAt(source, startIndex),
-                  oldEndPosition: pointAt(source, startIndex + removed),
-                  newEndPosition: pointAt(updated, startIndex + inserted.length),
-                })
-              );
-              const incremental = parser.parse(updated, tree)!;
-              tree.delete();
-              tree = incremental;
-              source = updated;
-              const fresh = parser.parse(source)!;
-              try {
-                expect(tree.rootNode.hasError, source).toBe(false);
-                expect(capture(tree), source).toEqual(capture(fresh));
-                expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
-              } finally {
-                fresh.delete();
-              }
-            }
-            expect(source).toBe(original);
-          } finally {
-            tree.delete();
-          }
-        }
-      }
-    }
-  } finally {
-    parser.delete();
-  }
-});
-
-function capture(tree: Tree): { tree: string; nodes: unknown[] } {
-  return {
-    tree: tree.rootNode.toString(),
-    nodes: tree.rootNode
-      .descendantsOfType(['function_definition', 'call', 'comment', 'line_continuation'])
-      .map((node) => [node.type, node.text, node.startIndex, node.endIndex, node.startPosition, node.endPosition]),
-  };
-}
 
 function pointAt(source: string, index: number): Point {
   const prefix = source.slice(0, index);

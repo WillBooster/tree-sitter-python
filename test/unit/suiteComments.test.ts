@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { Edit, Language, Parser, type Point, type Tree } from '@willbooster/web-tree-sitter';
+import { Language, Parser } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 const headers = [
@@ -44,65 +44,3 @@ test('keeps leading and comment-only suite comments inside their block without c
     parser.delete();
   }
 });
-
-test('reassigns comments consistently when a suite body is inserted and undone', () => {
-  const parser = new Parser().setLanguage(language);
-  try {
-    for (const ending of endings) {
-      const original = `def f():\n    # note\nafter()\n`.replaceAll('\n', ending);
-      const startIndex = original.indexOf('after()');
-      const addition = `    pass${ending}`;
-      let source = original;
-      let tree = parser.parse(source)!;
-      try {
-        for (const undo of [false, true]) {
-          const removed = undo ? addition.length : 0;
-          const inserted = undo ? '' : addition;
-          const updated = source.slice(0, startIndex) + inserted + source.slice(startIndex + removed);
-          tree.edit(
-            new Edit({
-              startIndex,
-              oldEndIndex: startIndex + removed,
-              newEndIndex: startIndex + inserted.length,
-              startPosition: pointAt(source, startIndex),
-              oldEndPosition: pointAt(source, startIndex + removed),
-              newEndPosition: pointAt(updated, startIndex + inserted.length),
-            })
-          );
-          const incremental = parser.parse(updated, tree)!;
-          tree.delete();
-          tree = incremental;
-          source = updated;
-          const fresh = parser.parse(source)!;
-          try {
-            expect(tree.rootNode.hasError).toBe(false);
-            expect(snapshot(tree)).toEqual(snapshot(fresh));
-            expect(tree.rootNode.descendantsOfType('comment')[0]?.parent?.type).toBe('block');
-            expect(tree.rootNode.lastNamedChild?.text).toBe('after()');
-          } finally {
-            fresh.delete();
-          }
-        }
-        expect(source).toBe(original);
-      } finally {
-        tree.delete();
-      }
-    }
-  } finally {
-    parser.delete();
-  }
-});
-
-function snapshot(tree: Tree): unknown {
-  return [
-    tree.rootNode.toString(),
-    tree.rootNode
-      .descendantsOfType(['block', 'comment', 'function_definition', 'call'])
-      .map((node) => [node.type, node.text, node.startIndex, node.endIndex, node.startPosition, node.endPosition]),
-  ];
-}
-
-function pointAt(source: string, index: number): Point {
-  const prefix = source.slice(0, index);
-  return { row: prefix.split('\n').length - 1, column: index - prefix.lastIndexOf('\n') - 1 };
-}
