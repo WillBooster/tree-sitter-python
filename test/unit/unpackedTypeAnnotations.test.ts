@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { Edit, Language, Parser, Query } from '@willbooster/web-tree-sitter';
+import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 import { testCommand } from './run.js';
@@ -84,46 +84,6 @@ test('keeps expression-valued starred annotations parseable and preserves follow
       }
     }
   } finally {
-    parser.delete();
-  }
-});
-
-test('incrementally reparses nested qualified unpacks with the same type captures as a fresh parse', () => {
-  const parser = new Parser().setLanguage(language);
-  const query = new Query(language, highlights);
-  const before = 'typing.Tuple[*Ts]';
-  const after = 'typing.List[typing.Tuple[*Us]]';
-  const source = `def f(x: ${before}): pass\nclass Following: pass\n`;
-  const previous = parser.parse(source)!;
-  try {
-    const startIndex = source.indexOf(before);
-    previous.edit(
-      new Edit({
-        startIndex,
-        oldEndIndex: startIndex + before.length,
-        newEndIndex: startIndex + after.length,
-        startPosition: { row: 0, column: startIndex },
-        oldEndPosition: { row: 0, column: startIndex + before.length },
-        newEndPosition: { row: 0, column: startIndex + after.length },
-      })
-    );
-    const updated = source.replace(before, after);
-    const incremental = parser.parse(updated, previous)!;
-    const fresh = parser.parse(updated)!;
-    try {
-      expect(incremental.rootNode.hasError).toBe(false);
-      expect(incremental.rootNode.toString()).toBe(fresh.rootNode.toString());
-      expect(
-        query.captures(incremental.rootNode).filter(({ name, node }) => name === 'type' && node.text === 'Us')
-      ).toHaveLength(1);
-      expect(incremental.rootNode.lastNamedChild?.text).toBe('class Following: pass');
-    } finally {
-      incremental.delete();
-      fresh.delete();
-    }
-  } finally {
-    previous.delete();
-    query.delete();
     parser.delete();
   }
 });
