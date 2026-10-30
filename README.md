@@ -80,7 +80,7 @@ fuzzed with. The parser requires runtime 15.0.0 or later within 15.x:
 ```toml
 [dependencies]
 tree-sitter = { package = "willbooster-tree-sitter", version = "15.0.0" }
-tree-sitter-python = { package = "willbooster-tree-sitter-python", version = "13" }
+tree-sitter-python = { package = "willbooster-tree-sitter-python", version = "14" }
 ```
 
 ```rust
