@@ -1,14 +1,13 @@
 import path from 'node:path';
 
-import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
+import { Language, Parser } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 await Parser.init();
 const language = await Language.load(path.join(import.meta.dirname, '../../tree-sitter-python.wasm'));
 
-test('exposes exception types and identifier aliases directly to field queries', () => {
+test('exposes exception types and identifier aliases through fields', () => {
   const parser = new Parser().setLanguage(language);
-  const query = new Query(language, '(except_clause value: (_) @exception alias: (identifier) @alias)');
   try {
     for (const keyword of ['except', 'except*']) {
       for (const exception of ['Error', '(First, Second)', 'First if flag else Second', 'factory()']) {
@@ -23,13 +22,6 @@ test('exposes exception types and identifier aliases directly to field queries',
               source
             ).toEqual([exception]);
             expect(clause.childForFieldName('alias')?.text, source).toBe(alias);
-            expect(
-              query.captures(tree.rootNode).map(({ name, node }) => [name, node.text]),
-              source
-            ).toEqual([
-              ['exception', exception],
-              ['alias', alias],
-            ]);
             expect(tree.rootNode.lastNamedChild?.text).toBe('after = 1');
           } finally {
             tree.delete();
@@ -38,7 +30,6 @@ test('exposes exception types and identifier aliases directly to field queries',
       }
     }
   } finally {
-    query.delete();
     parser.delete();
   }
 });

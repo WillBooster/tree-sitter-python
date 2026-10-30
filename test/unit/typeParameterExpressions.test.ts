@@ -95,3 +95,26 @@ test('retains contextual names in defaulted type parameters', async () => {
     parser.delete();
   }
 });
+
+test('parses ordinary, bounded, defaulted, variadic, and parameter-specification type parameters together', async () => {
+  await Parser.init();
+  const parser = new Parser().setLanguage(
+    await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'))
+  );
+  try {
+    for (const source of [
+      'class C[T, U: Bound = Default, *Ts = Pack, **P = Params]: pass',
+      'def f[T, U: Bound = Default, *Ts = Pack, **P = Params](): pass',
+      'type A[T, U: Bound = Default, *Ts = Pack, **P = Params] = tuple[T]',
+    ]) {
+      const tree = parser.parse(source)!;
+      try {
+        expect(tree.rootNode.hasError, source).toBe(false);
+      } finally {
+        tree.delete();
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});
