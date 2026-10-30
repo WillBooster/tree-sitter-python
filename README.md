@@ -71,7 +71,7 @@ parser.setLanguage(await Language.load(python));
 
 The package also ships the node types in `src/node-types.json`.
 
-Qualified generic bases use `member_type` inside `generic_type`. Generic bases in annotations also recognize the contextual identifier spellings `match`, `print`, `exec` and `lazy`, while ordinary value subscripts retain their expression trees. Plain qualified generic arguments also expose `member_type` inside their `type` operand, so queries can capture the terminal type name while excluding its module qualifiers. Structured unpacked annotations and unpacked generic arguments use a `type` child inside `splat_type`. Expression-valued starred parameter annotations, such as `*args: *factory()`, keep a direct expression child instead. Ordinary value unpacks keep their expression tree.
+Qualified generic bases use `member_type` inside `generic_type`. Generic bases in annotations also recognize the contextual identifier spellings `match`, `print`, `exec` and `lazy`, while ordinary value subscripts retain their expression trees. Plain qualified generic arguments also expose `member_type` inside their `type` operand. Structured unpacked annotations and unpacked generic arguments use a `type` child inside `splat_type`. Expression-valued starred parameter annotations, such as `*args: *factory()`, keep a direct expression child instead. Ordinary value unpacks keep their expression tree.
 
 In Rust, depend on the [crate](https://crates.io/crates/willbooster-tree-sitter-python) and on
 [willbooster-tree-sitter](https://crates.io/crates/willbooster-tree-sitter), the runtime this package is tested and
