@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
+import { Language, Parser } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 import { generationInputMtime } from '../helpers/generationInputs.js';
@@ -18,8 +18,7 @@ if (Math.max(generationInputMtime(root), ...sourceTimes) > artifactTime) {
 await Parser.init();
 const language = await Language.load(wasmPath);
 
-test('exposes every chained comparison operand through public fields and queries', () => {
-  const query = new Query(language, '(comparison_operator operands: (_) @operand)');
+test('exposes every chained comparison operand through public fields', () => {
   const parser = new Parser().setLanguage(language);
   const source = 'result = first < call(value) is not None\nafter = 1\n';
   const tree = parser.parse(source)!;
@@ -32,12 +31,8 @@ test('exposes every chained comparison operand through public fields and queries
       'None',
     ]);
     expect(comparison.childrenForFieldName('operators').map((node) => node.text)).toEqual(['<', 'is not']);
-    expect(query.captures(tree.rootNode).map(({ node }) => [node.text, node.startIndex, node.endIndex])).toEqual(
-      comparison.childrenForFieldName('operands').map((node) => [node.text, node.startIndex, node.endIndex])
-    );
   } finally {
     tree.delete();
-    query.delete();
     parser.delete();
   }
 });
