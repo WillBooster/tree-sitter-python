@@ -3114,15 +3114,6 @@
         {
           "type": "SYMBOL",
           "name": "block"
-        },
-        {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "_newline"
-          },
-          "named": true,
-          "value": "block"
         }
       ]
     },
@@ -3134,7 +3125,7 @@
           "name": "_indent"
         },
         {
-          "type": "REPEAT",
+          "type": "REPEAT1",
           "content": {
             "type": "SYMBOL",
             "name": "_statement"
