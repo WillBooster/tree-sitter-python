@@ -17,12 +17,12 @@ const endings = ['\n', '\r\n', '\r'];
 await Parser.init();
 const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
 
-test('keeps leading and comment-only suite comments inside their block without consuming following statements', () => {
+test('keeps leading suite comments inside their block without consuming following statements', () => {
   const parser = new Parser().setLanguage(language);
   try {
     for (const header of headers) {
       for (const ending of endings) {
-        for (const body of ['    # note\n    pass', '    "doc"\n    # note\n    pass', '    # note']) {
+        for (const body of ['    # note\n    pass', '    "doc"\n    # note\n    pass']) {
           const suffix = header === 'try:' ? '\nexcept:\n    pass' : '';
           const source = `${header}\n${body}${suffix}\nafter()\n`.replaceAll('\n', ending);
           const tree = parser.parse(source)!;
@@ -36,6 +36,34 @@ test('keeps leading and comment-only suite comments inside their block without c
             expect(tree.rootNode.lastNamedChild?.startIndex).toBe(source.indexOf('after()'));
           } finally {
             tree.delete();
+          }
+        }
+      }
+    }
+  } finally {
+    parser.delete();
+  }
+});
+
+test('rejects empty suites without consuming following calls or declarations', () => {
+  const parser = new Parser().setLanguage(language);
+  try {
+    for (const header of headers) {
+      for (const ending of endings) {
+        for (const body of ['', '    \n', '    # note\n']) {
+          for (const following of ['after()', 'def after():\n    pass', 'class After:\n    pass']) {
+            const suffix = header === 'try:' ? 'except:\n    pass\n' : '';
+            const source = `${header}\n${body}${suffix}${following}\n`.replaceAll('\n', ending);
+            const tree = parser.parse(source)!;
+            try {
+              expect(tree.rootNode.hasError, source).toBe(true);
+              const last = tree.rootNode.lastNamedChild;
+              expect(last?.text, source).toBe(following.replaceAll('\n', ending));
+              expect(last?.hasError, source).toBe(false);
+              expect(last?.startIndex, source).toBe(source.indexOf(following.split('\n')[0]!));
+            } finally {
+              tree.delete();
+            }
           }
         }
       }

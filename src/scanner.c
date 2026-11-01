@@ -1,3 +1,4 @@
+// code-gauge-allow-file fileNcss 579 -- Splitting the scanner would scatter its shared lexical state across translation units.
 #include "tree_sitter/array.h"
 #include "tree_sitter/parser.h"
 
@@ -362,19 +363,15 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
         if (scanner->indents.size > 0) {
             uint16_t current_indent_length = *array_back(&scanner->indents);
 
-            uint16_t suite_indent = indent_length;
-            if (suite_indent <= current_indent_length && first_comment_indent_length > (int32_t)current_indent_length) {
-                suite_indent = (uint16_t)first_comment_indent_length;
-            }
-            if (valid_symbols[INDENT] && !error_recovery_mode && suite_indent > current_indent_length) {
-                array_push(&scanner->indents, suite_indent);
+            if (valid_symbols[INDENT] && !error_recovery_mode && indent_length > current_indent_length) {
+                array_push(&scanner->indents, indent_length);
                 scanner->comment_only = false;
                 scanner->line_break_ready = consumed_newline;
                 lexer->result_symbol = INDENT;
                 return true;
             }
 
-            if (valid_symbols[DEDENT] && indent_length < current_indent_length && !scanner->inside_interpolated_string &&
+            if (valid_symbols[DEDENT] && !error_recovery_mode && indent_length < current_indent_length && !scanner->inside_interpolated_string &&
 
                 // Wait to create a dedent token until we've consumed any
                 // comments
