@@ -1,7 +1,6 @@
 //! This crate provides Python language support for the [tree-sitter] parsing library.
 //!
-//! The parser loads only with the WillBooster runtime, the [willbooster-tree-sitter] crate 15.0.0 or later within 15.x
-//! or 16.x.
+//! The parser loads only with the WillBooster runtime, the [willbooster-tree-sitter] crate 17.0.1 or later within 17.x.
 //!
 //! Typically, you will use the [`LANGUAGE`] constant to add this language to a
 //! tree-sitter [`Parser`], and then use the parser to parse some code:
@@ -17,7 +16,7 @@
 //! assert!(!tree.root_node().has_error());
 //! ```
 //!
-//! [`Parser`]: https://docs.rs/willbooster-tree-sitter/16.0.0/tree_sitter/struct.Parser.html
+//! [`Parser`]: https://docs.rs/willbooster-tree-sitter/17.0.1/tree_sitter/struct.Parser.html
 //! [tree-sitter]: https://tree-sitter.github.io/
 //! [willbooster-tree-sitter]: https://crates.io/crates/willbooster-tree-sitter
 
