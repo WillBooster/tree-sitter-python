@@ -200,6 +200,7 @@ bool tree_sitter_python_external_scanner_scan(void *payload, TSLexer *lexer, con
                     } else if (lexer->lookahead == '\n') {
                         advance(lexer);
                     }
+                    has_content = true;
                     continue;
                 }
                 if (is_bytes(delimiter)) {
