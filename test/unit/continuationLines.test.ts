@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { Language, Parser, Query } from '@willbooster/web-tree-sitter';
+import { Language, Parser } from '@willbooster/web-tree-sitter';
 import { expect, test } from 'vitest';
 
 test('parses continuation operands in their suite', async () => {
@@ -64,7 +64,6 @@ test('retains explicit line continuation nodes around brackets', async () => {
   await Parser.init();
   const language = await Language.load(path.resolve(import.meta.dirname, '../../tree-sitter-python.wasm'));
   const parser = new Parser().setLanguage(language);
-  const query = new Query(language, '(line_continuation) @continuation');
   try {
     for (const expression of ['(1)', '[1]', '{1}', '{1: 2}']) {
       for (const newline of ['\n', '\r\n']) {
@@ -75,7 +74,11 @@ test('retains explicit line continuation nodes around brackets', async () => {
           expect(tree.rootNode.hasError, source).toBe(false);
           const first = source.indexOf(continuation);
           const second = source.lastIndexOf(continuation);
-          expect(query.captures(tree.rootNode).map(({ node }) => [node.text, node.startIndex, node.endIndex])).toEqual([
+          expect(
+            tree.rootNode
+              .descendantsOfType('line_continuation')
+              .map((node) => [node.text, node.startIndex, node.endIndex])
+          ).toEqual([
             [continuation, first, first + continuation.length],
             [continuation, second, second + continuation.length],
           ]);
@@ -85,7 +88,6 @@ test('retains explicit line continuation nodes around brackets', async () => {
       }
     }
   } finally {
-    query.delete();
     parser.delete();
   }
 });
