@@ -1,8 +1,9 @@
 //! This crate provides Python language support for the [tree-sitter] parsing library.
 //!
-//! Its ABI (`0x5742000c`) rejects upstream Tree-sitter runtimes, and the parser requires the
-//! [willbooster-tree-sitter] crate 19.1.1 or later within 19.x (17.x and 18.x share ABI `0x5742000c` and pass the ABI
-//! check, whereas 19.1.0+ omits unused `TSLanguage` tables that pre-19.1.0 runtimes dereference).
+//! Its ABI (`0x5742000c`) rejects upstream Tree-sitter runtimes. Use this crate with
+//! [willbooster-tree-sitter] 20.0.0 or later within 20.x, the runtime line it is tested and
+//! fuzzed with (pre-19.1.0 WillBooster runtimes also share ABI `0x5742000c` and pass the ABI
+//! check, while dereferencing `TSLanguage` tables that this parser omits).
 //!
 //! Typically, you will use the [`LANGUAGE`] constant to add this language to a
 //! tree-sitter [`Parser`], and then use the parser to parse some code:
@@ -14,11 +15,11 @@
 //! parser
 //!     .set_language(&language.into())
 //!     .expect("Error loading Python parser");
-//! let tree = parser.parse(code, None).unwrap();
+//! let tree = parser.parse(code).unwrap();
 //! assert!(!tree.root_node().has_error());
 //! ```
 //!
-//! [`Parser`]: https://docs.rs/willbooster-tree-sitter/19.1.1/tree_sitter/struct.Parser.html
+//! [`Parser`]: https://docs.rs/willbooster-tree-sitter/20.0.0/tree_sitter/struct.Parser.html
 //! [tree-sitter]: https://tree-sitter.github.io/
 //! [willbooster-tree-sitter]: https://crates.io/crates/willbooster-tree-sitter
 
