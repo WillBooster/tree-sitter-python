@@ -536,11 +536,52 @@ a << b | c >> d & e ^ f
         (identifier))
       (binary_operator
         (binary_operator
-          (identifier)
+          (binary_operator
+            (identifier)
+            (identifier))
           (identifier))
-        (binary_operator
-          (identifier)
-          (identifier))))))
+        (identifier)))))
+
+================================================================================
+Bitwise operator precedence
+================================================================================
+
+1 ^ 2 & 3
+1 & 2 ^ 3
+1 | 2 ^ 3 & 4
+1 & 2 | 3 ^ 4
+
+--------------------------------------------------------------------------------
+
+(module
+  (expression_statement
+    (binary_operator
+      left: (integer)
+      right: (binary_operator
+        left: (integer)
+        right: (integer))))
+  (expression_statement
+    (binary_operator
+      left: (binary_operator
+        left: (integer)
+        right: (integer))
+      right: (integer)))
+  (expression_statement
+    (binary_operator
+      left: (integer)
+      right: (binary_operator
+        left: (integer)
+        right: (binary_operator
+          left: (integer)
+          right: (integer)))))
+  (expression_statement
+    (binary_operator
+      left: (binary_operator
+        left: (integer)
+        right: (integer))
+      right: (binary_operator
+        left: (integer)
+        right: (integer)))))
 
 ================================================================================
 Boolean operators
