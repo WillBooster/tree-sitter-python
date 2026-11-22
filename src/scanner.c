@@ -1,4 +1,4 @@
-// code-gauge-allow-file fileNcss 579 -- Splitting the scanner would scatter its shared lexical state across translation units.
+// code-gauge-allow-file fileNcss -- Splitting the scanner would scatter its shared lexical state across translation units.
 #include "tree_sitter/array.h"
 #include "tree_sitter/parser.h"
 
